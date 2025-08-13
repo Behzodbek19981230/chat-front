@@ -15,11 +15,14 @@ import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
+
+import moment from 'moment'
+
+import toast from 'react-hot-toast'
+
 import type { ThemeColor } from '@core/types'
-import type { AppDispatch } from '@/redux-store'
 
 // Slice Imports
-import { addNewChat } from '@/redux-store/slices/chat'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -30,19 +33,12 @@ import CustomTextField from '@core/components/mui/TextField'
 
 // Util Imports
 import { getInitials } from '@/utils/getInitials'
-import { formatDateToMonthShort } from './utils'
 import { request } from '@configs/request'
-import useSWR from 'swr'
-import { ChatStoreType } from '@views/chat/index'
-import moment from 'moment'
-import toast from 'react-hot-toast'
-
-
+import type { ChatStoreType } from '@views/chat/index'
 
 type Props = {
-  chatStore:any,
-  getActiveUserData: (id: number,chatId:number) => void
-  dispatch: AppDispatch
+  chatStore: ChatStoreType
+  getActiveUserData: (id: number, chatId: number) => void
   backdropOpen: boolean
   setBackdropOpen: (value: boolean) => void
   sidebarOpen: boolean
@@ -55,62 +51,63 @@ type Props = {
 
 type RenderChatType = {
   chatStore: ChatStoreType
-  getActiveUserData: (id: number,chatId:number) => void
+  getActiveUserData: (id: number, chatId: number) => void
   setSidebarOpen: (value: boolean) => void
   backdropOpen: boolean
   setBackdropOpen: (value: boolean) => void
   isBelowMdScreen: boolean
+  isChatActive: boolean
 }
 
 // Render chat list
 const renderChat = (props: RenderChatType) => {
   // Props
-  const { chatStore, getActiveUserData, setSidebarOpen, backdropOpen, setBackdropOpen, isBelowMdScreen,isChatActive } = props
+  const { chatStore, getActiveUserData, setSidebarOpen, backdropOpen, setBackdropOpen, isBelowMdScreen, isChatActive } =
+    props
 
-  const contact=chatStore?.contacts
+  const contact = chatStore?.contacts
 
-    return contact?.map(itm=>(
-      <li
-        key={itm?.id}
-        className={classnames('flex items-start gap-4 pli-3 plb-2 cursor-pointer rounded mbe-1', {
-          'bg-primary shadow-primarySm': isChatActive,
-          'text-[var(--mui-palette-primary-contrastText)]': isChatActive
-        })}
-        onClick={() => {
-          getActiveUserData(itm.userId,itm.id)
-          isBelowMdScreen && setSidebarOpen(false)
-          isBelowMdScreen && backdropOpen && setBackdropOpen(false)
-        }}
-      >
-        <AvatarWithBadge
-          src={itm.avatar}
-          isChatActive={isChatActive}
-          alt={itm.title}
-          badgeColor={itm.online ? 'success' : 'secondary'}
-          color={'warning'}
-        />
-        <div className='min-is-0 flex-auto'>
-          <Typography color='inherit'>{itm.title}</Typography>
+  return contact?.map(itm => (
+    <li
+      key={itm?.id}
+      className={classnames('flex items-start gap-4 pli-3 plb-2 cursor-pointer rounded mbe-1', {
+        'bg-primary shadow-primarySm': isChatActive,
+        'text-[var(--mui-palette-primary-contrastText)]': isChatActive
+      })}
+      onClick={() => {
+        getActiveUserData(itm.userId, itm.id)
+        isBelowMdScreen && setSidebarOpen(false)
+        isBelowMdScreen && backdropOpen && setBackdropOpen(false)
+      }}
+    >
+      <AvatarWithBadge
+        src={itm.avatar}
+        isChatActive={isChatActive}
+        alt={itm.title}
+        badgeColor={itm.online ? 'success' : 'secondary'}
+        color={'warning'}
+      />
+      <div className='min-is-0 flex-auto'>
+        <Typography color='inherit'>{itm.title}</Typography>
 
-            <Typography variant='body2' color={isChatActive ? 'inherit' : 'text.secondary'} className='truncate'>
-              {itm.lastMessage}
-            </Typography>
-        </div>
-        <div className='flex flex-col items-end justify-start'>
-          <Typography
-            variant='body2'
-            color='inherit'
-            className={classnames('truncate', {
-              'text-textDisabled': !isChatActive
-            })}
-          >
-            {moment(itm.lastMessageTime).format('hh:mm A')}
-          </Typography>
-          {itm.unreadCount > 0 ? <CustomChip round='true' label={itm.unreadCount} color='error' size='small' /> : null}
-        </div>
-      </li>
-    ))
-
+        <Typography variant='body2' color={isChatActive ? 'inherit' : 'text.secondary'} className='truncate'>
+          {itm.lastMessage}
+        </Typography>
+      </div>
+      <div className='flex flex-col items-end justify-start'>
+        <Typography
+          variant='body2'
+          color='inherit'
+          className={classnames('truncate', {
+            'text-textDisabled': !isChatActive
+          })}
+        >
+          {moment(itm.lastMessageTime).format('hh:mm A')}
+        </Typography>
+        {itm.unreadCount > 0 ? <CustomChip round='true' label={itm.unreadCount} color='error' size='small' /> : null}
+      </div>
+    </li>
+  ))
 }
 
 // Scroll wrapper for chat list
@@ -140,50 +137,55 @@ const SidebarLeft = (props: Props) => {
   // States
   const [userSidebar, setUserSidebar] = useState(false)
   const [searchValue, setSearchValue] = useState<string | null>()
-  const[contacts,setContacts]=useState<any[]>([])
-  const fetchContacts = async (phone) => {
+  const [contacts, setContacts] = useState<any[]>([])
+
+  const fetchContacts = async (phone: string) => {
     try {
       if (!phone) {
         setContacts([])
+
         return
       }
+
       const res = await request()('/users', {
-        params:{
+        params: {
           phone: phone
         }
       })
 
       setContacts(res.data)
+
       return
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error fetching contacts:', error)
     }
   }
 
-const findChatId = async (id: number) => {
+  const findChatId = async (id: number) => {
     try {
       const response = await request()(`/messages/chat`, {
         params: {
           userId: id
         }
       })
+
       return response.data
-    }
-    catch (error) {
-    console.log('Error finding chat ID:', error.response.data.error)
+    } catch (error: any) {
       toast.error(error.response.data.error)
+
       return null
     }
-}
+  }
+
   const handleChange = async (event: any, newValue: string | null) => {
     setSearchValue(newValue)
+
     if (newValue) {
       const contact = contacts.find(contact => contact?.phone === newValue)
-      const chatId=await findChatId(contact?.id)
+      const chatId = await findChatId(contact?.id)
 
       if (contact && chatId) {
-        getActiveUserData(contact.id,chatId.id)
+        getActiveUserData(contact.id, chatId.id)
       } else {
         // If contact not found, create a new chat
         const newChat = {
@@ -191,18 +193,12 @@ const findChatId = async (id: number) => {
           userId: contact?.id,
           fullName: contact?.fullName,
           avatar: contact?.avatar,
-          phone: newValue,
-
+          phone: newValue
         }
-        setContacts(
-          prevContacts => [...prevContacts, newChat]
-        )
 
+        setContacts(prevContacts => [...prevContacts, newChat])
       }
     }
-
-
-
 
     isBelowMdScreen && setSidebarOpen(false)
     setBackdropOpen(false)
@@ -255,13 +251,12 @@ const findChatId = async (id: number) => {
                   {...params}
                   variant='outlined'
                   placeholder='Search Contacts'
-                  onChange={
-                    (e) => {
-                      const value = e.target.value
-                      setSearchValue(value)
-                      fetchContacts(value)
-                    }
-                  }
+                  onChange={e => {
+                    const value = e.target.value
+
+                    setSearchValue(value)
+                    fetchContacts(value)
+                  }}
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (
@@ -298,9 +293,9 @@ const findChatId = async (id: number) => {
                         </CustomAvatar>
                       )
                     ) : null}
-                 <div className='flex flex-col '>
-                    {contact?.fullName}
-                    <Typography>{option}</Typography>
+                    <div className='flex flex-col '>
+                      {contact?.fullName}
+                      <Typography>{option}</Typography>
                     </div>
                   </li>
                 )
@@ -328,7 +323,8 @@ const findChatId = async (id: number) => {
               backdropOpen,
               setSidebarOpen,
               isBelowMdScreen,
-              setBackdropOpen
+              setBackdropOpen,
+              isChatActive: false
             })}
           </ul>
         </ScrollWrapper>

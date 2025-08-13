@@ -1,14 +1,14 @@
 // React Imports
 import { useState } from 'react'
-import type { ChangeEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 // MUI Import
+import { useRouter } from 'next/navigation'
+
 import Drawer from '@mui/material/Drawer'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
-import Radio from '@mui/material/Radio'
-import RadioGroup from '@mui/material/RadioGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
+
 import FormLabel from '@mui/material/FormLabel'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -22,20 +22,10 @@ import Button from '@mui/material/Button'
 // Third Party Imports
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
-// Type Imports
-import type { AppDispatch } from '@/redux-store'
-import type { ProfileUserType, StatusType } from '@/types/chatTypes'
-
-// Slice Imports
-import { setUserStatus } from '@/redux-store/slices/chat'
-
 // Component Imports
 import AvatarWithBadge from './AvatarWithBadge'
-import { statusObj } from '@views/chat/SidebarLeft'
 import CustomTextField from '@core/components/mui/TextField'
-import Cookies from 'js-cookie'
 import { cleareStorage } from '@configs/storage'
-import { useRouter } from 'next/navigation'
 
 type Props = {
   userSidebar: boolean
@@ -54,8 +44,9 @@ const ScrollWrapper = ({ children, isBelowLgScreen }: { children: ReactNode; isB
 
 const UserProfileLeft = (props: Props) => {
   // Props
-  const { userSidebar, setUserSidebar,   isBelowLgScreen, isBelowSmScreen } = props
-  const {push}=useRouter()
+  const { userSidebar, setUserSidebar, isBelowLgScreen, isBelowSmScreen } = props
+  const { push } = useRouter()
+
   // States
   const [twoStepVerification, setTwoStepVerification] = useState<boolean>(true)
   const [notification, setNotification] = useState<boolean>(false)
@@ -68,15 +59,12 @@ const UserProfileLeft = (props: Props) => {
     setNotification(!notification)
   }
 
-  const handleUserStatus = (e: ChangeEvent<HTMLInputElement>) => {
-  }
   const handleLogout = () => {
     cleareStorage()
     push('/login')
-
   }
 
-  return  (
+  return (
     <>
       <Drawer
         open={userSidebar}
@@ -110,13 +98,18 @@ const UserProfileLeft = (props: Props) => {
               <Typography className='uppercase' color='text.disabled'>
                 About
               </Typography>
-              <CustomTextField fullWidth rows={3} multiline id='about-textarea' defaultValue={'profileUserData.about'} />
+              <CustomTextField
+                fullWidth
+                rows={3}
+                multiline
+                id='about-textarea'
+                defaultValue={'profileUserData.about'}
+              />
             </div>
             <div className='flex flex-col gap-1'>
               <FormLabel id='status-radio-buttons-group-label' className='uppercase text-textDisabled'>
                 Status
               </FormLabel>
-
             </div>
             <div className='flex flex-col gap-1'>
               <Typography className='uppercase' color='text.disabled'>
@@ -163,7 +156,13 @@ const UserProfileLeft = (props: Props) => {
                 </ListItem>
               </List>
             </div>
-            <Button variant='contained' fullWidth className='mbs-auto' endIcon={<i className='tabler-logout' />} onClick={handleLogout}>
+            <Button
+              variant='contained'
+              fullWidth
+              className='mbs-auto'
+              endIcon={<i className='tabler-logout' />}
+              onClick={handleLogout}
+            >
               Logout
             </Button>
           </div>

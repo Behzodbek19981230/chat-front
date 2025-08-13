@@ -17,8 +17,7 @@ import Paper from '@mui/material/Paper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import MenuList from '@mui/material/MenuList'
 import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
-import MenuItem from '@mui/material/MenuItem'
+
 import Button from '@mui/material/Button'
 
 // Hook Imports
@@ -64,7 +63,6 @@ const UserDropdown = () => {
   }
 
   const handleUserLogout = async () => {
-
     cleareStorage()
     router.push('/login')
   }
@@ -113,7 +111,6 @@ const UserDropdown = () => {
                       <Typography variant='caption'>admin@vuexy.com</Typography>
                     </div>
                   </div>
-
 
                   <div className='flex items-center plb-2 pli-3'>
                     <Button

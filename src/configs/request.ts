@@ -1,9 +1,7 @@
 import type { AxiosInstance } from 'axios'
 import axios from 'axios'
-import toast from 'react-hot-toast'
 
-import { cleareStorage } from './storage'
-import {  getTokenCSR } from './storage'
+import { cleareStorage, getTokenCSR } from './storage'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -53,10 +51,9 @@ function createAxios() {
           message = error.response?.data?.message
           break
         default:
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           message = error.response?.data?.message
       }
-
-
 
       throw error
     }

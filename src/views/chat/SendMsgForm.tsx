@@ -17,20 +17,14 @@ import MenuItem from '@mui/material/MenuItem'
 import Picker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
 
-// Type Imports
-import type { AppDispatch } from '@/redux-store'
-
-// Slice Imports
-import { sendMsg } from '@/redux-store/slices/chat'
-
 // Component Imports
 import CustomIconButton from '@core/components/mui/IconButton'
-import { ContactType } from '@views/chat/ChatContent'
+import type { ContactType } from '@views/chat/ChatContent'
 
 type Props = {
   activeUser: ContactType
   chatId: number
-  sendMsg: ({ chatId,msg }: {chatId:number, msg: string }) => void
+  sendMsg: ({ chatId, msg }: { chatId: number; msg: string }) => void
   isBelowSmScreen: boolean
   messageInputRef: RefObject<HTMLDivElement>
 }
@@ -85,7 +79,7 @@ const EmojiPicker = ({
   )
 }
 
-const SendMsgForm = ({  activeUser,sendMsg,chatId, isBelowSmScreen, messageInputRef }: Props) => {
+const SendMsgForm = ({ activeUser, sendMsg, chatId, isBelowSmScreen, messageInputRef }: Props) => {
   // States
   const [msg, setMsg] = useState('')
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -114,7 +108,7 @@ const SendMsgForm = ({  activeUser,sendMsg,chatId, isBelowSmScreen, messageInput
     event.preventDefault()
 
     if (msg.trim() !== '') {
-      sendMsg({chatId, msg })
+      sendMsg({ chatId, msg })
       setMsg('')
     }
   }
@@ -127,7 +121,6 @@ const SendMsgForm = ({  activeUser,sendMsg,chatId, isBelowSmScreen, messageInput
             <IconButton
               id='option-menu'
               aria-haspopup='true'
-
               {...(open && { 'aria-expanded': true, 'aria-controls': 'share-menu' })}
               onClick={handleClick}
               ref={anchorRef}

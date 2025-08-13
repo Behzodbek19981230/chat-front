@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { styled, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
@@ -9,15 +11,15 @@ import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import Button from '@mui/material/Button'
 import classnames from 'classnames'
+
+import toast from 'react-hot-toast'
+
 import Link from '@components/Link'
-import Logo from '@components/layout/shared/Logo'
 import CustomTextField from '@core/components/mui/TextField'
-import themeConfig from '@configs/themeConfig'
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
-import axios from 'axios'
 import { request } from '@configs/request'
-import toast from 'react-hot-toast'
+import type { Mode } from '@/@core/types'
 
 const LoginIllustration = styled('img')(({ theme }) => ({
   zIndex: 2,
@@ -36,15 +38,15 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
-const Register = ({ mode }) => {
+const Register = ({ mode }: { mode: Mode }) => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [phone, setPhone] = useState('')
-  const[fullName, setFullName] = useState('')
+  const [fullName, setFullName] = useState('')
 
   const [password, setPassword] = useState('')
   const [phoneError, setPhoneError] = useState('')
   const [passwordError, setPasswordError] = useState('')
-  const[fullNameError, setFullNameError] = useState('')
+  const [fullNameError, setFullNameError] = useState('')
 
   const router = useRouter()
   const { settings } = useSettings()
@@ -61,42 +63,42 @@ const Register = ({ mode }) => {
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
-  const validatePhone = (value) => {
+  const validatePhone = (value: string) => {
     // faqat +998 format
     const uzbPhoneRegex = /^\+998\d{9}$/
+
     if (!value) return 'Telefon raqam majburiy'
     if (!uzbPhoneRegex.test(value)) return 'Telefon raqam formati: +998XXXXXXXXX'
+
     return ''
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const phoneErr = validatePhone(phone)
     const passwordErr = !password ? 'Parol majburiy' : ''
-const fullNameErr = !fullName ? 'To‘liq ism majburiy' : ''
+    const fullNameErr = !fullName ? 'To‘liq ism majburiy' : ''
+
     setPhoneError(phoneErr)
     setPasswordError(passwordErr)
     setFullNameError(fullNameErr)
 
     if (!phoneErr && !passwordErr && !fullNameErr) {
-
       try {
         const { data } = await request().post('/auth/register', {
           phone,
           password,
           fullName
         })
+
         console.log(data)
         toast.success('Ro‘yxatdan o‘tish muvaffaqiyatli amalga oshirildi')
         router.push('/login')
-      }
-      catch (error) {
-        console.log(error)
+      } catch (error: any) {
         setPhoneError(error.response?.data?.message)
         toast.error(error.response?.data?.message)
       }
-
     }
   }
 
@@ -119,11 +121,10 @@ const fullNameErr = !fullName ? 'To‘liq ism majburiy' : ''
       </div>
 
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
-
         <div className='flex flex-col gap-6 is-full sm:is-auto md:is-full sm:max-is-[400px]'>
           <div className='flex flex-col gap-1'>
-           Ro'yxatdan o‘tish
-            <Typography>Iltimos ro'yxatdan o'ting </Typography>
+            Ro‘yxatdan o‘tish
+            <Typography>Iltimos ro‘yxatdan o‘ting </Typography>
           </div>
 
           <form noValidate autoComplete='off' onSubmit={handleSubmit} className='flex flex-col gap-5'>
@@ -133,7 +134,7 @@ const fullNameErr = !fullName ? 'To‘liq ism majburiy' : ''
               label='Telefon raqam'
               placeholder='+998901234567'
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={e => setPhone(e.target.value)}
               error={!!phoneError}
               helperText={phoneError}
             />
@@ -142,10 +143,9 @@ const fullNameErr = !fullName ? 'To‘liq ism majburiy' : ''
               label='To‘liq ism'
               placeholder='Ismingizni kiriting'
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={e => setFullName(e.target.value)}
               error={!!fullNameError}
               helperText={fullNameError}
-
             />
 
             <CustomTextField
@@ -154,7 +154,7 @@ const fullNameErr = !fullName ? 'To‘liq ism majburiy' : ''
               placeholder='••••••••'
               type={isPasswordShown ? 'text' : 'password'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               error={!!passwordError}
               helperText={passwordError}
               InputProps={{
@@ -169,11 +169,11 @@ const fullNameErr = !fullName ? 'To‘liq ism majburiy' : ''
             />
 
             <Button fullWidth variant='contained' type='submit'>
-              Ro'yxatdan o‘tish
+              Ro‘yxatdan o‘tish
             </Button>
 
             <div className='flex justify-center items-center gap-2'>
-              <Typography>Avval ro'yxatdan o'tganmisiz? </Typography>
+              <Typography>Avval ro‘yxatdan o‘tganmisiz? </Typography>
               <Typography component={Link} color='primary' href='/login'>
                 Login
               </Typography>

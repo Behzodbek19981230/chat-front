@@ -1,4 +1,6 @@
 // Type Imports
+import { Toaster } from 'react-hot-toast'
+
 import type { ChildrenType } from '@core/types'
 
 // Component Imports
@@ -7,7 +9,6 @@ import BlankLayout from '@layouts/BlankLayout'
 
 // Util Imports
 import { getSystemMode } from '@core/utils/serverHelpers'
-import { Toaster } from 'react-hot-toast'
 
 type Props = ChildrenType
 

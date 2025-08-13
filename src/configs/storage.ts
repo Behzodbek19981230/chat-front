@@ -8,10 +8,10 @@ const deleteCookieCompletely = (name: string, path = '/', domain = '') => {
 if (typeof window !== 'undefined') {
   // deleteCookieCompletely('access_token', '/', '.ecdn.uz')
 }
-export function getTokenCSR(): string | undefined {
-  return Cookies.get('token_chat')?? undefined
-}
 
+export function getTokenCSR(): string | undefined {
+  return Cookies.get('token_chat') ?? undefined
+}
 
 const cleareStorage = () => {
   const allCookies = Cookies.get()
@@ -22,8 +22,8 @@ const cleareStorage = () => {
 
   if (typeof window !== 'undefined') {
     Cookies.remove(process.env.SECRET_COOKIE_NAME as string)
-    deleteCookieCompletely('token_chat', '/', '.ecdn.uz')
-    deleteCookieCompletely('token_chat', '/', '.tris.uz')
+    deleteCookieCompletely('token_chat', '/', 'universal-uz.uz')
+    deleteCookieCompletely('token_chat', '/', 'universal-uz.uz')
     deleteCookieCompletely('token_chat', '/')
   }
 }

@@ -18,9 +18,7 @@ import CustomAvatar from '@core/components/mui/Avatar'
 
 // Util Imports
 import { getInitials } from '@/utils/getInitials'
-import { ChatStoreType } from '@views/chat/index'
-
-
+import type { ChatStoreType } from '@views/chat/index'
 
 type ChatLogProps = {
   chatStore: ChatStoreType
@@ -28,7 +26,6 @@ type ChatLogProps = {
   isBelowMdScreen: boolean
   isBelowSmScreen: boolean
 }
-
 
 // Wrapper for the chat log to handle scrolling
 const ScrollWrapper = ({
@@ -60,9 +57,9 @@ const ScrollWrapper = ({
 const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen }: ChatLogProps) => {
   // Props
   console.log(chatStore)
-  const { profileUser, contacts,chats,activeUser } = chatStore
-  console.log(contacts)
+  const { profileUser, contacts, chats, activeUser } = chatStore
 
+  console.log(contacts)
 
   // Refs
   const scrollRef = useRef(null)
@@ -94,8 +91,8 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
         {activeUser &&
           chats.map((msgGroup, index) => {
             const isSender = msgGroup.senderId === profileUser?.id
-            const isSeen= msgGroup.readBy.some(user => user !== activeUser?.id)
-            const isDelivered=!isSeen && msgGroup.readBy.length>0
+            const isSeen = msgGroup.readBy.some(user => user !== activeUser?.id)
+            const isDelivered = !isSeen && msgGroup.readBy.length > 0
 
             return (
               <div key={index} className={classnames('flex gap-4 p-6', { 'flex-row-reverse': isSender })}>
@@ -107,11 +104,7 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
                       className='is-8 bs-8'
                     />
                   ) : (
-                    <CustomAvatar
-                      color={'warning'}
-                      skin='light'
-                      size={32}
-                    >
+                    <CustomAvatar color={'warning'} skin='light' size={32}>
                       {getInitials(contacts.find(contact => contact.userId === activeUser?.id)?.title as string)}
                     </CustomAvatar>
                   )
@@ -128,34 +121,32 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
                     'max-is-[calc(100%-5.75rem)]': isBelowSmScreen
                   })}
                 >
-                    <Typography
-                      className={classnames('whitespace-pre-wrap pli-4 plb-2 shadow-xs', {
-                        'bg-backgroundPaper rounded-e rounded-b': !isSender,
-                        'bg-primary text-[var(--mui-palette-primary-contrastText)] rounded-s rounded-b': isSender
-                      })}
-                      style={{ wordBreak: 'break-word' }}
-                    >
-                      {msgGroup.content}
-                    </Typography>
+                  <Typography
+                    className={classnames('whitespace-pre-wrap pli-4 plb-2 shadow-xs', {
+                      'bg-backgroundPaper rounded-e rounded-b': !isSender,
+                      'bg-primary text-[var(--mui-palette-primary-contrastText)] rounded-s rounded-b': isSender
+                    })}
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {msgGroup.content}
+                  </Typography>
 
-                        <div  className='flex items-center gap-2'>
-                          {isSeen ? (
-                            <i className='tabler-checks text-success text-base' />
-                          ) : (
-                            isDelivered && <i className='tabler-check text-base' />
-                          )}
-                          {msgGroup.createdAt ? (
-                            <Typography variant='caption'>
-                              {new Date(msgGroup.createdAt).toLocaleString('en-US', {
-                                hour: 'numeric',
-                                minute: 'numeric',
-                                hour12: true
-                              })}
-                            </Typography>
-                          ) : null}
-                        </div>
-
-
+                  <div className='flex items-center gap-2'>
+                    {isSeen ? (
+                      <i className='tabler-checks text-success text-base' />
+                    ) : (
+                      isDelivered && <i className='tabler-check text-base' />
+                    )}
+                    {msgGroup.createdAt ? (
+                      <Typography variant='caption'>
+                        {new Date(msgGroup.createdAt).toLocaleString('en-US', {
+                          hour: 'numeric',
+                          minute: 'numeric',
+                          hour12: true
+                        })}
+                      </Typography>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             )

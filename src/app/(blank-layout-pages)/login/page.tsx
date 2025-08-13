@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { styled, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
@@ -9,16 +11,19 @@ import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import Button from '@mui/material/Button'
 import classnames from 'classnames'
+
+import toast from 'react-hot-toast'
+
+import Cookies from 'js-cookie'
+
 import Link from '@components/Link'
 import Logo from '@components/layout/shared/Logo'
 import CustomTextField from '@core/components/mui/TextField'
 import themeConfig from '@configs/themeConfig'
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
-import axios from 'axios'
 import { request } from '@configs/request'
-import toast from 'react-hot-toast'
-import Cookies from 'js-cookie'
+import type { Mode } from '@/@core/types'
 
 const LoginIllustration = styled('img')(({ theme }) => ({
   zIndex: 2,
@@ -37,7 +42,11 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
-const LoginV2 = ({ mode }) => {
+interface LoginV2Props {
+  mode: Mode
+}
+
+const LoginV2 = ({ mode }: LoginV2Props) => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
@@ -59,15 +68,17 @@ const LoginV2 = ({ mode }) => {
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
-  const validatePhone = (value) => {
+  const validatePhone = (value: string) => {
     // faqat +998 format
     const uzbPhoneRegex = /^\+998\d{9}$/
+
     if (!value) return 'Telefon raqam majburiy'
     if (!uzbPhoneRegex.test(value)) return 'Telefon raqam formati: +998XXXXXXXXX'
+
     return ''
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const phoneErr = validatePhone(phone)
@@ -77,24 +88,21 @@ const LoginV2 = ({ mode }) => {
     setPasswordError(passwordErr)
 
     if (!phoneErr && !passwordErr) {
-
       try {
         const { data } = await request().post('/auth/login', {
           phone,
           password
         })
+
         Cookies.set('token_chat', data.token, { expires: 7 })
         Cookies.set('user_chat', JSON.stringify(data.user), { expires: 7 })
         router.push('/')
 
-
         toast.success('Kirish muvaffaqiyatli amalga oshirildi')
+      } catch (error: any) {
+        setPhoneError(error.response.data?.message)
+        toast.error(error.response.data?.message)
       }
-      catch (error) {
-       setPhoneError(error.response.data?.message)
-     toast.error(error.response.data?.message)
-      }
-
     }
   }
 
@@ -133,7 +141,7 @@ const LoginV2 = ({ mode }) => {
               label='Telefon raqam'
               placeholder='+998901234567'
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={e => setPhone(e.target.value)}
               error={!!phoneError}
               helperText={phoneError}
             />
@@ -144,7 +152,7 @@ const LoginV2 = ({ mode }) => {
               placeholder='••••••••'
               type={isPasswordShown ? 'text' : 'password'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               error={!!passwordError}
               helperText={passwordError}
               InputProps={{

@@ -1,14 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+
 import Backdrop from '@mui/material/Backdrop'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import type { Theme } from '@mui/material/styles'
 import classNames from 'classnames'
+
+import type { Socket } from 'socket.io-client'
+import { io } from 'socket.io-client'
+
 import { useSettings } from '@core/hooks/useSettings'
 import { commonLayoutClasses } from '@layouts/utils/layoutClasses'
 import { request } from '@configs/request'
-import { io, Socket } from 'socket.io-client'
 
 import SidebarLeft from './SidebarLeft'
 import ChatContent from './ChatContent'
@@ -55,13 +59,15 @@ export type ChatStoreType = {
 const ChatWrapper = () => {
   const [backdropOpen, setBackdropOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
   const [chatStore, setChatStore] = useState<ChatStoreType>({
     profileUser: null,
     activeUser: null,
     chats: [],
     contacts: []
   })
-  const[activeChatId, setActiveChatId] = useState<number | null>(null)
+
+  const [activeChatId, setActiveChatId] = useState<number | null>(null)
 
   const messageInputRef = useRef<HTMLDivElement>(null)
   const socketRef = useRef<Socket | null>(null)
@@ -74,6 +80,7 @@ const ChatWrapper = () => {
   // socket ulanishi faqat bir marta
   useEffect(() => {
     socketRef.current = io(process.env.NEXT_PUBLIC_API_URL_BASE!)
+
     return () => {
       socketRef.current?.disconnect()
     }
@@ -91,9 +98,9 @@ const ChatWrapper = () => {
         ...prev,
         contacts: Array.isArray(prev.contacts)
           ? prev.contacts.map(contact => ({
-            ...contact,
-            online: users.includes(contact.userId)
-          }))
+              ...contact,
+              online: users.includes(contact.userId)
+            }))
           : []
       }))
     }
@@ -107,32 +114,38 @@ const ChatWrapper = () => {
 
   useEffect(() => {
     if (!socketRef.current) return
+
     if (activeChatId && socketRef.current.connected) {
-      socketRef.current.emit("join-chat", activeChatId);
+      socketRef.current.emit('join-chat', activeChatId)
     }
 
     return () => {
       // Chatdan chiqishda
       // @ts-ignore
-      socketRef.current?.emit("leave-chat", activeChatId);
-    };
-  }, [activeChatId]);
+      if (socketRef.current) {
+        socketRef.current.emit('leave-chat', activeChatId)
+      }
+    }
+  }, [activeChatId])
 
-
+  // @ts-ignore
   useEffect(() => {
     if (!socketRef.current) return
 
-    socketRef.current.on("receive-message", (message) => {
+    socketRef.current.on('receive-message', message => {
       // @ts-ignore
       setChatStore(prev => {
-        const updatedChats = [...prev.chats,{
-          chatId: message.chatId,
-          content: message.content,
-          createdAt: new Date().toISOString(),
-          id: message.id,
-          readBy: [],
-          senderId: message.senderId
-        }];
+        const updatedChats = [
+          ...prev.chats,
+          {
+            chatId: message.chatId,
+            content: message.content,
+            createdAt: new Date().toISOString(),
+            id: message.id,
+            readBy: [],
+            senderId: message.senderId
+          }
+        ]
 
         // Agar activeUserga tegishli bo'lsa, uni yangilash
         if (prev.activeUser?.id === message.senderId) {
@@ -151,17 +164,14 @@ const ChatWrapper = () => {
           chats: updatedChats
         }
       })
+    })
 
-
-
-    });
-
-    return () => socketRef.current?.off("receive-message");
-  }, []);
-
+    return () => socketRef.current?.off('receive-message')
+  }, [])
 
   const fetchProfileUserData = async () => {
     const response = await request()('/auth/me')
+
     setChatStore(prev => ({
       ...prev,
       profileUser: {
@@ -174,6 +184,7 @@ const ChatWrapper = () => {
 
   const fetchChatData = async () => {
     const data = await request()('/messages/chats')
+
     setChatStore(prev => ({
       ...prev,
       contacts: data.data
@@ -182,27 +193,30 @@ const ChatWrapper = () => {
 
   const fetchActiveUserData = async (id: number) => {
     const response = await request()(`/messages/${id}/messages`)
+
     return response.data
   }
 
   const findUserId = async (id: number) => {
     const response = await request()(`/users/${id}`)
+
     return response.data
   }
 
   const sendMsgChats = async (chatId: number, msg: string) => {
     if (chatId) {
       // @ts-ignore
-      socketRef.current?.emit("send-message", {
+      socketRef.current?.emit('send-message', {
         chatId,
         senderId: chatStore.profileUser?.id,
         content: msg
-      });
+      })
       await request().post(`/messages/send`, {
         content: msg,
         chatId
       })
       const activeUserData = await fetchActiveUserData(chatId)
+
       setChatStore(prev => ({
         ...prev,
         chats: activeUserData
@@ -215,6 +229,7 @@ const ChatWrapper = () => {
       const newChat = await request().post(`/messages/start`, {
         userId: chatStore.activeUser?.id
       })
+
       await sendMsgChats(newChat.data.id, msg)
     } else {
       await sendMsgChats(chatId, msg)
@@ -226,6 +241,7 @@ const ChatWrapper = () => {
     setActiveChatId(chatId)
     const userData = await findUserId(id)
     const activeUserData = await fetchActiveUserData(chatId)
+
     setChatStore(prev => ({
       ...prev,
       activeUser: {
@@ -234,7 +250,7 @@ const ChatWrapper = () => {
         avatar: userData.avatar,
         avatarColor: userData.avatarColor,
         role: userData.role,
-        online:false,
+        online: false,
         lastSeen: userData.lastSeen || null
       },
       chats: activeUserData
@@ -246,6 +262,7 @@ const ChatWrapper = () => {
     if (!chatStore.contacts.length) {
       fetchChatData()
     }
+
     if (!chatStore.profileUser) {
       fetchProfileUserData()
     }
@@ -294,6 +311,7 @@ const ChatWrapper = () => {
       />
 
       <ChatContent
+        chatId={activeChatId || 0}
         chatStore={chatStore}
         sendMsg={sendMsg}
         backdropOpen={backdropOpen}

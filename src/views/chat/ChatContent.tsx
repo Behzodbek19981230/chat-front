@@ -8,9 +8,6 @@ import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import CardContent from '@mui/material/CardContent'
 
-// Type Imports
-import type { AppDispatch } from '@/redux-store'
-
 // Component Imports
 import OptionMenu from '@core/components/option-menu'
 import AvatarWithBadge from './AvatarWithBadge'
@@ -18,8 +15,9 @@ import ChatLog from './ChatLog'
 import SendMsgForm from './SendMsgForm'
 import UserProfileRight from './UserProfileRight'
 import CustomAvatar from '@core/components/mui/Avatar'
-import { ChatStoreType } from '@views/chat/index'
-export type  ContactType={
+import type { ChatStoreType } from '@views/chat/index'
+
+export type ContactType = {
   id: number | null
   fullName: string
   avatar: string
@@ -29,7 +27,8 @@ export type  ContactType={
   lastSeen?: Date | null
 }
 type Props = {
-  sendMsg: ({ chatId,msg }: {chatId:number, msg: string }) => void
+  chatId: number
+  sendMsg: ({ chatId, msg }: { chatId: number; msg: string }) => void
   chatStore: ChatStoreType
   backdropOpen: boolean
   setBackdropOpen: (open: boolean) => void
@@ -61,13 +60,15 @@ const UserAvatar = ({
       alt={activeUser?.fullName}
       src={activeUser?.avatar}
       color={'secondary'}
-      badgeColor={activeUser.online? 'success' : 'secondary'}
+      badgeColor={activeUser.online ? 'success' : 'secondary'}
     />
     <div>
       <Typography color='text.primary'>{activeUser?.fullName}</Typography>
-      <Typography variant='body2'>{
-activeUser?.online ? 'Online' : `Last seen: ${activeUser?.lastSeen ? new Date(activeUser.lastSeen).toLocaleTimeString() : 'N/A'}`
-      }</Typography>
+      <Typography variant='body2'>
+        {activeUser?.online
+          ? 'Online'
+          : `Last seen: ${activeUser?.lastSeen ? new Date(activeUser.lastSeen).toLocaleTimeString() : 'N/A'}`}
+      </Typography>
     </div>
   </div>
 )
@@ -75,6 +76,7 @@ activeUser?.online ? 'Online' : `Last seen: ${activeUser?.lastSeen ? new Date(ac
 const ChatContent = (props: Props) => {
   // Props
   const {
+    chatId,
     chatStore,
     sendMsg,
     backdropOpen,
@@ -90,7 +92,7 @@ const ChatContent = (props: Props) => {
   const [userProfileRightOpen, setUserProfileRightOpen] = useState(false)
 
   // Vars
-  const { activeUser,contacts } = chatStore
+  const { activeUser, contacts } = chatStore
 
   useEffect(() => {
     if (!backdropOpen && userProfileRightOpen) {
@@ -135,7 +137,10 @@ const ChatContent = (props: Props) => {
                   <i className='tabler-menu-2' />
                 </IconButton>
                 <UserAvatar
-                  activeUser={{ online: contacts.find(itm => itm.userId === activeUser.id)?.online as boolean, ...activeUser }}
+                  activeUser={{
+                    ...activeUser,
+                    online: contacts.find(itm => itm.userId === activeUser.id)?.online as boolean
+                  }}
                   setBackdropOpen={setBackdropOpen}
                   setUserProfileLeftOpen={setUserProfileRightOpen}
                 />
@@ -209,6 +214,7 @@ const ChatContent = (props: Props) => {
           />
 
           <SendMsgForm
+            chatId={chatId}
             sendMsg={sendMsg}
             activeUser={activeUser}
             isBelowSmScreen={isBelowSmScreen}

@@ -90,8 +90,8 @@ export default function LoginPage() {
           password
         })
 
-        Cookies.set('token_chat', data.token, { expires: 7 })
-        Cookies.set('user_chat', JSON.stringify(data.user), { expires: 7 })
+        Cookies.set('token_chat', data.token)
+        Cookies.set('user_chat', JSON.stringify(data.user))
         router.push('/')
 
         toast.success('Kirish muvaffaqiyatli amalga oshirildi')

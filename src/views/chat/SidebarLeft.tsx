@@ -81,7 +81,7 @@ const renderChat = (props: RenderChatType) => {
       }}
     >
       <AvatarWithBadge
-        src={itm.avatar}
+        src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${itm?.avatar ?? ''}`}
         isChatActive={isChatActive}
         alt={itm.title}
         badgeColor={itm.online ? 'success' : 'secondary'}
@@ -231,8 +231,8 @@ const SidebarLeft = (props: Props) => {
       >
         <div className='flex items-center plb-[18px] pli-6 gap-4 border-be'>
           <AvatarWithBadge
-            alt={'chatStore.profileUser.fullName'}
-            src={'chatStore.profileUser.avatar'}
+            alt={chatStore.profileUser?.fullName}
+            src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${chatStore.profileUser?.avatar ?? ''}`}
             badgeColor='success'
             onClick={() => {
               setUserSidebar(true)
@@ -280,7 +280,7 @@ const SidebarLeft = (props: Props) => {
                       contact?.avatar ? (
                         <Avatar
                           alt={contact?.fullName}
-                          src={contact?.avatar}
+                          src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${contact?.avatar ?? ''}`}
                           key={option.toLowerCase().replace(/\s+/g, '-')}
                         />
                       ) : (
@@ -331,6 +331,7 @@ const SidebarLeft = (props: Props) => {
       </Drawer>
 
       <UserProfileLeft
+        chatStore={chatStore}
         userSidebar={userSidebar}
         setUserSidebar={setUserSidebar}
         isBelowLgScreen={isBelowLgScreen}

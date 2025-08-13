@@ -9,7 +9,6 @@ import Drawer from '@mui/material/Drawer'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 
-import FormLabel from '@mui/material/FormLabel'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
@@ -26,9 +25,12 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 import AvatarWithBadge from './AvatarWithBadge'
 import CustomTextField from '@core/components/mui/TextField'
 import { cleareStorage } from '@configs/storage'
+import type { ChatStoreType } from './index'
+import { request } from '@/configs/request'
 
 type Props = {
   userSidebar: boolean
+  chatStore: ChatStoreType
   setUserSidebar: (open: boolean) => void
   isBelowLgScreen: boolean
   isBelowSmScreen: boolean
@@ -44,16 +46,15 @@ const ScrollWrapper = ({ children, isBelowLgScreen }: { children: ReactNode; isB
 
 const UserProfileLeft = (props: Props) => {
   // Props
-  const { userSidebar, setUserSidebar, isBelowLgScreen, isBelowSmScreen } = props
+  const { userSidebar, setUserSidebar, isBelowLgScreen, isBelowSmScreen, chatStore } = props
   const { push } = useRouter()
 
-  // States
-  const [twoStepVerification, setTwoStepVerification] = useState<boolean>(true)
-  const [notification, setNotification] = useState<boolean>(false)
+  const [avatar, setAvatar] = useState<string>(
+    (process.env.NEXT_PUBLIC_API_URL_BASE ?? '') + (chatStore?.profileUser?.avatar || '')
+  )
 
-  const handleTwoStepVerification = () => {
-    setTwoStepVerification(!twoStepVerification)
-  }
+  // States
+  const [notification, setNotification] = useState<boolean>(false)
 
   const handleNotification = () => {
     setNotification(!notification)
@@ -62,6 +63,35 @@ const UserProfileLeft = (props: Props) => {
   const handleLogout = () => {
     cleareStorage()
     push('/login')
+  }
+
+  const onPutUser = async (avatar: File) => {
+    const formData = new FormData()
+
+    formData.append('avatar', avatar)
+
+    try {
+      await request().put('/users/' + chatStore?.profileUser?.id, formData)
+      setAvatar(URL.createObjectURL(avatar))
+    } catch (error) {
+      console.error('Error updating profile:', error)
+    }
+  }
+
+  const uploadImage = async () => {
+    const fileInput = document.getElementById('upload-avatar') as HTMLInputElement
+
+    if (fileInput && fileInput.files) {
+      const file = fileInput.files[0]
+
+      if (file) {
+        await onPutUser(file)
+      }
+    }
+
+    if (fileInput) {
+      fileInput.click()
+    }
   }
 
   return (
@@ -82,14 +112,16 @@ const UserProfileLeft = (props: Props) => {
         </IconButton>
         <div className='flex flex-col justify-center items-center gap-4 mbs-6 pli-6 pbs-6 pbe-3'>
           <AvatarWithBadge
-            alt={'profileUserData.fullName'}
-            src={'profileUserData.avatar'}
+            alt={chatStore?.profileUser?.fullName}
+            onClick={uploadImage}
+            src={avatar}
             badgeColor='warning'
             className='bs-[84px] is-[84px]'
             badgeSize={12}
           />
+          <input type='file' hidden id='upload-avatar' onChange={uploadImage} />
           <div className='text-center'>
-            <Typography variant='h5'>{'profileUserData.fullName'}</Typography>
+            <Typography variant='h5'>{chatStore?.profileUser?.fullName}</Typography>
           </div>
         </div>
         <ScrollWrapper isBelowLgScreen={isBelowLgScreen}>
@@ -106,27 +138,12 @@ const UserProfileLeft = (props: Props) => {
                 defaultValue={'profileUserData.about'}
               />
             </div>
-            <div className='flex flex-col gap-1'>
-              <FormLabel id='status-radio-buttons-group-label' className='uppercase text-textDisabled'>
-                Status
-              </FormLabel>
-            </div>
+
             <div className='flex flex-col gap-1'>
               <Typography className='uppercase' color='text.disabled'>
                 Settings
               </Typography>
               <List className='plb-0'>
-                <ListItem
-                  disablePadding
-                  secondaryAction={<Switch checked={twoStepVerification} onChange={handleTwoStepVerification} />}
-                >
-                  <ListItemButton onClick={handleTwoStepVerification} className='p-2'>
-                    <ListItemIcon>
-                      <i className='tabler-lock' />
-                    </ListItemIcon>
-                    <ListItemText primary='Two-step Verification' />
-                  </ListItemButton>
-                </ListItem>
                 <ListItem
                   disablePadding
                   secondaryAction={<Switch checked={notification} onChange={handleNotification} />}
@@ -138,14 +155,7 @@ const UserProfileLeft = (props: Props) => {
                     <ListItemText primary='Notification' />
                   </ListItemButton>
                 </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton className='p-2'>
-                    <ListItemIcon>
-                      <i className='tabler-user-plus' />
-                    </ListItemIcon>
-                    <ListItemText primary='Invite Friends' />
-                  </ListItemButton>
-                </ListItem>
+
                 <ListItem disablePadding>
                   <ListItemButton className='p-2'>
                     <ListItemIcon>

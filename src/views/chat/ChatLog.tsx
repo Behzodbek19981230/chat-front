@@ -100,7 +100,7 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
                   contacts.find(contact => contact.id === activeUser?.id)?.avatar ? (
                     <Avatar
                       alt={contacts.find(contact => contact.id === activeUser?.id)?.title}
-                      src={contacts.find(contact => contact.id === activeUser?.id)?.avatar}
+                      src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${contacts.find(contact => contact.id === activeUser?.id)?.avatar ?? ''}`}
                       className='is-8 bs-8'
                     />
                   ) : (
@@ -109,9 +109,17 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
                     </CustomAvatar>
                   )
                 ) : profileUser?.avatar ? (
-                  <Avatar alt={profileUser.fullName} src={profileUser.avatar} className='is-8 bs-8' />
+                  <Avatar
+                    alt={profileUser.fullName}
+                    src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${profileUser.avatar ?? ''}`}
+                    className='is-8 bs-8'
+                  />
                 ) : (
-                  <CustomAvatar alt={profileUser?.fullName} src={profileUser?.avatar} size={32} />
+                  <CustomAvatar
+                    alt={profileUser?.fullName}
+                    src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${profileUser?.avatar ?? ''}`}
+                    size={32}
+                  />
                 )}
                 <div
                   className={classnames('flex flex-col gap-2', {

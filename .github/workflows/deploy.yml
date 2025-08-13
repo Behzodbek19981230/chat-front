@@ -20,10 +20,11 @@ jobs:
 
 
       - name: Deploy Frontend
-        run:
+        run: |
+          ssh -o StrictHostKeyChecking=no deploy@45.138.159.166 "
             cd /var/www/chat-front &&
             git pull &&
             npm install &&
             npm run build &&
             pm2 restart chat-front
-
+          "

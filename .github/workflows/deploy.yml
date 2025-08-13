@@ -23,4 +23,6 @@ jobs:
             git pull origin main
             npm install
             npm run build
-            pm2 restart chat-front || pm2 start npm --name "chat-front" -- start
+            pm2 delete chat-front
+            pm2 start npm --name "chat-front" -- start
+            pm2 save

@@ -37,21 +37,22 @@ export type ContactUserType = {
   userId: number
   online: boolean
 }
-
+export type ActiveUserType = {
+  id: number | null
+  fullName: string
+  avatar: string
+  avatarColor: string
+  role: string
+  online: boolean
+  lastSeen?: Date | null
+}
 export type ChatStoreType = {
   profileUser: {
     id: number | null
     fullName: string
     avatar: string
   } | null
-  activeUser: {
-    id: number | null
-    fullName: string
-    avatar: string
-    avatarColor: string
-    role: string
-    online: boolean
-  } | null
+  activeUser: ActiveUserType | null
   chats: ChatType[]
   contacts: ContactUserType[]
 }

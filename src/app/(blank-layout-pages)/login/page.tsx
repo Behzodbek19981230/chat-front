@@ -23,7 +23,6 @@ import themeConfig from '@configs/themeConfig'
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
 import { request } from '@configs/request'
-import type { Mode } from '@/@core/types'
 
 const LoginIllustration = styled('img')(({ theme }) => ({
   zIndex: 2,
@@ -42,11 +41,8 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
-interface LoginV2Props {
-  mode: Mode
-}
-
-const LoginV2 = ({ mode }: LoginV2Props) => {
+export default function LoginPage() {
+  const mode = 'system'
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
@@ -182,5 +178,3 @@ const LoginV2 = ({ mode }: LoginV2Props) => {
     </div>
   )
 }
-
-export default LoginV2

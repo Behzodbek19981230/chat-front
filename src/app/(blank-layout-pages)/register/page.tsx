@@ -19,7 +19,6 @@ import CustomTextField from '@core/components/mui/TextField'
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
 import { request } from '@configs/request'
-import type { Mode } from '@/@core/types'
 
 const LoginIllustration = styled('img')(({ theme }) => ({
   zIndex: 2,
@@ -38,11 +37,11 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
-const Register = ({ mode }: { mode: Mode }) => {
+const Register = () => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [phone, setPhone] = useState('')
   const [fullName, setFullName] = useState('')
-
+  const mode = 'system'
   const [password, setPassword] = useState('')
   const [phoneError, setPhoneError] = useState('')
   const [passwordError, setPasswordError] = useState('')

@@ -16,16 +16,14 @@ import Button from '@mui/material/Button'
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
-// Type Imports
-import type { ContactType } from '@/types/apps/chatTypes'
-
 // Component Imports
 import AvatarWithBadge from './AvatarWithBadge'
+import type { ActiveUserType } from './index'
 
 type Props = {
   open: boolean
   handleClose: () => void
-  activeUser: ContactType
+  activeUser: ActiveUserType
   isBelowLgScreen: boolean
   isBelowSmScreen: boolean
 }
@@ -72,7 +70,7 @@ const UserProfileRight = (props: Props) => {
         <AvatarWithBadge
           alt={activeUser.fullName}
           src={activeUser.avatar}
-          color={activeUser.avatarColor}
+          color={'primary'}
           badgeColor={'warning'}
           className='bs-[84px] is-[84px] text-3xl'
           badgeSize={12}
@@ -88,7 +86,11 @@ const UserProfileRight = (props: Props) => {
           <Typography className='uppercase' color='text.disabled'>
             About
           </Typography>
-          <Typography>{activeUser.about}</Typography>
+          <Typography>
+            {
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+            }
+          </Typography>
         </div>
         <div className='flex flex-col gap-1'>
           <Typography className='uppercase' color='text.disabled'>

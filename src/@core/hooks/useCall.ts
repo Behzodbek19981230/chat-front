@@ -1,5 +1,5 @@
 // hooks/useCall.ts
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { Socket } from 'socket.io-client'
 
@@ -7,7 +7,7 @@ type MediaPrefs = { audio: boolean; video: boolean }
 
 export function useCall(socket: Socket, selfUserId: string | number) {
   const [inCall, setInCall] = useState(false)
-  const [outCall,setOutCall]=useState(false)
+  const [outCall, setOutCall] = useState(false)
   const [incomingCall, setIncomingCall] = useState<null | { fromUserId: any; media: MediaPrefs }>(null)
 
   const [micOn, setMicOn] = useState(true)
@@ -57,6 +57,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
 
     pcRef.current = pc
   }
+
   const getMedia = async (media: MediaPrefs) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -106,6 +107,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       endCall()
     }
   }
+
   const rejectCall = () => {
     if (!incomingCall) return
     socket.emit('answer-call', { fromUserId: selfUserId, toUserId: incomingCall.fromUserId, accept: false })
@@ -152,11 +154,13 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       if (!accept) {
         endCall()
         alert('User rejected the call')
-        return
+
+return
       }
 
       try {
         const offer = await pcRef.current!.createOffer()
+
         await pcRef.current!.setLocalDescription(offer)
         socket.emit('webrtc-offer', {
           toUserId: remoteUserIdRef.current,
@@ -172,6 +176,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       try {
         await pcRef.current!.setRemoteDescription(new RTCSessionDescription(offer))
         const answer = await pcRef.current!.createAnswer()
+
         await pcRef.current!.setLocalDescription(answer)
         socket.emit('webrtc-answer', {
           toUserId: remoteUserIdRef.current,

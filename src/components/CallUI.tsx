@@ -1,15 +1,12 @@
 'use client'
 import React, { useEffect, useRef } from 'react'
-
 import { IconButton } from '@mui/material'
-
 import { useCall } from '@/@core/hooks/useCall'
 import { getSocket } from '@/@core/lib/socket'
 import VideoCall from './VideoCall'
 
 export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: string; remoteUserId: string }) {
   const socket = getSocket()
-
   const {
     inCall,
     outCall,
@@ -38,18 +35,24 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     }
   }, [socket, selfUserId])
 
+  // Update video streams when they change
   useEffect(() => {
     if (localVideo.current && localStreamRef.current) {
       localVideo.current.srcObject = localStreamRef.current
+    } else if (localVideo.current) {
+      localVideo.current.srcObject = null
     }
 
     if (remoteVideo.current && remoteStreamRef.current) {
       remoteVideo.current.srcObject = remoteStreamRef.current
+    } else if (remoteVideo.current) {
+      remoteVideo.current.srcObject = null
     }
-  })
+  }, [localStreamRef.current, remoteStreamRef.current])
 
   console.log('CallUI rendered', {
     inCall,
+    outCall,
     incomingCall,
     micOn,
     camOn,
@@ -59,7 +62,6 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
 
   return (
     <>
-      {/* Call button */}
       {!inCall && !incomingCall && (
         <IconButton color='secondary' onClick={() => callUser(remoteUserId, { audio: true, video: true })}>
           <i className='tabler-video' />

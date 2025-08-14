@@ -41,58 +41,71 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       }
     }
 
-    // ✅ remote track kelganda darrov video elementga ulash
     pc.ontrack = e => {
       if (!remoteStreamRef.current) {
         remoteStreamRef.current = new MediaStream()
       }
 
-      e.streams[0].getTracks().forEach(t => remoteStreamRef.current!.addTrack(t))
+      // Clear existing tracks
+      remoteStreamRef.current.getTracks().forEach(track => track.stop())
 
-      if (remoteVideoElementRef.current) {
-        remoteVideoElementRef.current.srcObject = e.streams[0]
-      }
+      // Add new tracks
+      e.streams[0].getTracks().forEach(track => {
+        remoteStreamRef.current!.addTrack(track)
+      })
     }
 
     pcRef.current = pc
   }
-
   const getMedia = async (media: MediaPrefs) => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: media.audio,
-      video: media.video
-    })
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: media.audio,
+        video: media.video
+      })
 
-    localStreamRef.current = stream
-
-    // ✅ local videoni ulash
-    if (localVideoElementRef.current) {
-      localVideoElementRef.current.srcObject = stream
+      localStreamRef.current = stream
+      stream.getTracks().forEach(track => {
+        pcRef.current?.addTrack(track, stream)
+      })
+    } catch (error) {
+      console.error('Error getting media:', error)
+      throw error
     }
-
-    stream.getTracks().forEach(track => pcRef.current!.addTrack(track, stream))
   }
 
-  // Qo‘ng‘iroq qilish
   const callUser = async (toUserId: string | number, media: MediaPrefs) => {
-    remoteUserIdRef.current = toUserId
-    createPeerConnection()
-    await getMedia(media)
-    socket.emit('call-user', { fromUserId: selfUserId, toUserId, media })
-    setOutCall(true)
+    try {
+      remoteUserIdRef.current = toUserId
+      createPeerConnection()
+      await getMedia(media)
+      socket.emit('call-user', { fromUserId: selfUserId, toUserId, media })
+      setOutCall(true)
+    } catch (error) {
+      console.error('Call failed:', error)
+      endCall()
+    }
   }
 
-  // Qo‘ng‘iroq qabul qilish
   const acceptCall = async () => {
     if (!incomingCall) return
-    remoteUserIdRef.current = incomingCall.fromUserId
-    socket.emit('answer-call', { fromUserId: selfUserId, toUserId: incomingCall.fromUserId, accept: true })
-    createPeerConnection()
-    await getMedia(incomingCall.media)
-    setInCall(true)
-    setIncomingCall(null)
-  }
 
+    try {
+      remoteUserIdRef.current = incomingCall.fromUserId
+      socket.emit('answer-call', {
+        fromUserId: selfUserId,
+        toUserId: incomingCall.fromUserId,
+        accept: true
+      })
+      createPeerConnection()
+      await getMedia(incomingCall.media)
+      setInCall(true)
+      setIncomingCall(null)
+    } catch (error) {
+      console.error('Accept call failed:', error)
+      endCall()
+    }
+  }
   const rejectCall = () => {
     if (!incomingCall) return
     socket.emit('answer-call', { fromUserId: selfUserId, toUserId: incomingCall.fromUserId, accept: false })
@@ -131,32 +144,49 @@ export function useCall(socket: Socket, selfUserId: string | number) {
 
   // Socket listeners
   useEffect(() => {
-    socket.on('incoming-call', ({ fromUserId, media }) => {
+    const handleIncomingCall = ({ fromUserId, media }: { fromUserId: any; media: MediaPrefs }) => {
       setIncomingCall({ fromUserId, media })
-    })
+    }
 
-    socket.on('call-answered', async ({ accept }) => {
+    const handleCallAnswered = async ({ accept }: { accept: boolean }) => {
       if (!accept) {
         endCall()
         alert('User rejected the call')
-
         return
       }
 
-      const offer = await pcRef.current!.createOffer()
+      try {
+        const offer = await pcRef.current!.createOffer()
+        await pcRef.current!.setLocalDescription(offer)
+        socket.emit('webrtc-offer', {
+          toUserId: remoteUserIdRef.current,
+          offer
+        })
+      } catch (error) {
+        console.error('Error creating offer:', error)
+        endCall()
+      }
+    }
 
-      await pcRef.current!.setLocalDescription(offer)
-      socket.emit('webrtc-offer', { toUserId: remoteUserIdRef.current, offer })
-    })
+    const handleWebRTCOffer = async ({ offer }: { offer: RTCSessionDescriptionInit }) => {
+      try {
+        await pcRef.current!.setRemoteDescription(new RTCSessionDescription(offer))
+        const answer = await pcRef.current!.createAnswer()
+        await pcRef.current!.setLocalDescription(answer)
+        socket.emit('webrtc-answer', {
+          toUserId: remoteUserIdRef.current,
+          answer
+        })
+        setInCall(true)
+      } catch (error) {
+        console.error('Error handling offer:', error)
+        endCall()
+      }
+    }
 
-    socket.on('webrtc-offer', async ({ offer }) => {
-      await pcRef.current!.setRemoteDescription(new RTCSessionDescription(offer))
-      const answer = await pcRef.current!.createAnswer()
-
-      await pcRef.current!.setLocalDescription(answer)
-      socket.emit('webrtc-answer', { toUserId: remoteUserIdRef.current, answer })
-      setInCall(true)
-    })
+    socket.on('incoming-call', handleIncomingCall)
+    socket.on('call-answered', handleCallAnswered)
+    socket.on('webrtc-offer', handleWebRTCOffer)
 
     socket.on('webrtc-answer', async ({ answer }) => {
       await pcRef.current!.setRemoteDescription(new RTCSessionDescription(answer))
@@ -175,9 +205,9 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     })
 
     return () => {
-      socket.off('incoming-call')
-      socket.off('call-answered')
-      socket.off('webrtc-offer')
+      socket.off('incoming-call', handleIncomingCall)
+      socket.off('call-answered', handleCallAnswered)
+      socket.off('webrtc-offer', handleWebRTCOffer)
       socket.off('webrtc-answer')
       socket.off('webrtc-ice')
       socket.off('call-ended')

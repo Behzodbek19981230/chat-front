@@ -10,8 +10,7 @@ import HorizontalLayout from '@layouts/HorizontalLayout'
 
 // Component Imports
 import Providers from '@components/Providers'
-import Header from '@components/layout/horizontal/Header'
-import HorizontalFooter from '@components/layout/horizontal/Footer'
+
 import ScrollToTop from '@core/components/scroll-to-top'
 
 // Util Imports
@@ -24,7 +23,7 @@ const Layout = async ({ children }: ChildrenType) => {
     <Providers direction={direction}>
       <Toaster />
 
-      <HorizontalLayout header={<Header />} footer={<HorizontalFooter />}>
+      <HorizontalLayout header={<></>} footer={<></>}>
         {children}
       </HorizontalLayout>
 

@@ -145,12 +145,6 @@ const ChatContent = (props: Props) => {
                   setBackdropOpen={setBackdropOpen}
                   setUserProfileLeftOpen={setUserProfileRightOpen}
                 />
-                {chatStore && (
-                  <CallUI
-                    remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
-                    selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
-                  />
-                )}
               </div>
             ) : (
               <UserAvatar
@@ -161,25 +155,33 @@ const ChatContent = (props: Props) => {
             )}
 
             {isBelowMdScreen ? (
-              <OptionMenu
-                iconButtonProps={{ size: 'medium' }}
-                iconClassName='text-secondary'
-                options={[
-                  {
-                    text: 'View Contact',
-                    menuItemProps: {
-                      onClick: () => {
-                        setUserProfileRightOpen(true)
-                        setBackdropOpen(true)
+              <div className='flex items-center gap-1'>
+                {chatStore && (
+                  <CallUI
+                    remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
+                    selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
+                  />
+                )}
+                <OptionMenu
+                  iconButtonProps={{ size: 'medium' }}
+                  iconClassName='text-secondary'
+                  options={[
+                    {
+                      text: 'View Contact',
+                      menuItemProps: {
+                        onClick: () => {
+                          setUserProfileRightOpen(true)
+                          setBackdropOpen(true)
+                        }
                       }
-                    }
-                  },
-                  'Mute Notifications',
-                  'Block Contact',
-                  'Clear Chat',
-                  'Block'
-                ]}
-              />
+                    },
+                    'Mute Notifications',
+                    'Block Contact',
+                    'Clear Chat',
+                    'Block'
+                  ]}
+                />
+              </div>
             ) : (
               <div className='flex items-center gap-1'>
                 {chatStore && (

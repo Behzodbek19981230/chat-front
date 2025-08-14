@@ -23,10 +23,10 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Component Imports
 import AvatarWithBadge from './AvatarWithBadge'
-import CustomTextField from '@core/components/mui/TextField'
 import { cleareStorage } from '@configs/storage'
 import type { ChatStoreType } from './index'
 import { request } from '@/configs/request'
+import ModeDropdown from '@/components/layout/shared/ModeDropdown'
 
 type Props = {
   userSidebar: boolean
@@ -132,18 +132,7 @@ const UserProfileLeft = (props: Props) => {
         </div>
         <ScrollWrapper isBelowLgScreen={isBelowLgScreen}>
           <div className='flex flex-col gap-6 p-6 pbs-3'>
-            <div className='flex flex-col gap-1'>
-              <Typography className='uppercase' color='text.disabled'>
-                About
-              </Typography>
-              <CustomTextField
-                fullWidth
-                rows={3}
-                multiline
-                id='about-textarea'
-                defaultValue={'profileUserData.about'}
-              />
-            </div>
+            <ModeDropdown />
 
             <div className='flex flex-col gap-1'>
               <Typography className='uppercase' color='text.disabled'>

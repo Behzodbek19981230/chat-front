@@ -13,6 +13,11 @@ export function useCall(socket: Socket, selfUserId: string | number) {
 
   const localStreamRef = useRef<MediaStream | null>(null)
   const remoteStreamRef = useRef<MediaStream | null>(null)
+
+  // ✅ video element ref-larini hook ichida saqlaymiz
+  const localVideoElementRef = useRef<HTMLVideoElement | null>(null)
+  const remoteVideoElementRef = useRef<HTMLVideoElement | null>(null)
+
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const remoteUserIdRef = useRef<string | number | null>(null)
 
@@ -34,9 +39,17 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       }
     }
 
+    // ✅ remote track kelganda darrov video elementga ulash
     pc.ontrack = e => {
-      if (!remoteStreamRef.current) remoteStreamRef.current = new MediaStream()
+      if (!remoteStreamRef.current) {
+        remoteStreamRef.current = new MediaStream()
+      }
+
       e.streams[0].getTracks().forEach(t => remoteStreamRef.current!.addTrack(t))
+
+      if (remoteVideoElementRef.current) {
+        remoteVideoElementRef.current.srcObject = e.streams[0]
+      }
     }
 
     pcRef.current = pc
@@ -49,6 +62,12 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     })
 
     localStreamRef.current = stream
+
+    // ✅ local videoni ulash
+    if (localVideoElementRef.current) {
+      localVideoElementRef.current.srcObject = stream
+    }
+
     stream.getTracks().forEach(track => pcRef.current!.addTrack(track, stream))
   }
 
@@ -57,8 +76,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     remoteUserIdRef.current = toUserId
     createPeerConnection()
     await getMedia(media)
-    console.log('Calling user:', toUserId, 'with media:', media)
-
     socket.emit('call-user', { fromUserId: selfUserId, toUserId, media })
   }
 
@@ -73,14 +90,12 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     setIncomingCall(null)
   }
 
-  // Qo‘ng‘iroqni rad etish
   const rejectCall = () => {
     if (!incomingCall) return
     socket.emit('answer-call', { fromUserId: selfUserId, toUserId: incomingCall.fromUserId, accept: false })
     setIncomingCall(null)
   }
 
-  // Qo‘ng‘iroqni tugatish
   const endCall = () => {
     if (remoteUserIdRef.current) {
       socket.emit('end-call', { toUserId: remoteUserIdRef.current })
@@ -124,7 +139,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
         return
       }
 
-      // create offer
       const offer = await pcRef.current!.createOffer()
 
       await pcRef.current!.setLocalDescription(offer)
@@ -176,7 +190,9 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     toggleCam,
     micOn,
     camOn,
-    localStreamRef,
-    remoteStreamRef
+
+    // ✅ video elementlarni tashqaridan ulash uchun
+    localVideoElementRef,
+    remoteVideoElementRef
   }
 }

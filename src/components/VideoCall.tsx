@@ -14,8 +14,8 @@ type Props = {
   toggleMic: () => void
   camOn: boolean
   toggleCam: () => void
-  localVideo: React.RefObject<HTMLVideoElement>
-  remoteVideo: React.RefObject<HTMLVideoElement>
+  localVideoRef: React.RefObject<HTMLVideoElement>
+  remoteVideoRef: React.RefObject<HTMLVideoElement>
 }
 
 export default function VideoCall({
@@ -28,18 +28,15 @@ export default function VideoCall({
   toggleMic,
   camOn,
   toggleCam,
-  localVideo,
-  remoteVideo
+  localVideoRef,
+  remoteVideoRef
 }: Props) {
   return (
     <div className='fixed inset-0 flex items-center justify-center bg-gray-900 z-50'>
-      {/* Incoming call UI */}
       {incomingCall && !inCall && (
         <div className='flex flex-col items-center gap-4 p-6 bg-white rounded-xl shadow-lg'>
-          <Typography variant='h6' className='text-center'>
-            {incomingCall.fromUserId} is calling...
-          </Typography>
-          <Image src='/images/videocall.gif' alt='Incoming Call' width={120} height={120} className='mb-4' />
+          <Typography variant='h6'>{incomingCall.fromUserId} is calling...</Typography>
+          <Image src='/images/videocall.gif' alt='Incoming Call' width={120} height={120} />
           <div className='flex gap-4'>
             <Button onClick={acceptCall} variant='contained' color='success' startIcon={<i className='tabler-phone' />}>
               Qabul qilish
@@ -55,16 +52,26 @@ export default function VideoCall({
           </div>
         </div>
       )}
-
-      {/* In-call UI */}
+      {/* Outgoing Call UI */}
+      {/* {outgoingCall && !inCall && (
+        <div className='flex flex-col items-center gap-4 p-6 bg-white rounded-xl shadow-lg'>
+          <Typography variant='h6' className='text-center'>
+            {outgoingCall.toUserId} bilan bog‘lanmoqda...
+          </Typography>
+          <Image src='/images/calling.gif' alt='Calling...' width={120} height={120} className='mb-4' />
+          <Button onClick={endCall} variant='contained' color='error' startIcon={<i className='tabler-phone-off' />}>
+            Bekor qilish
+          </Button>
+        </div>
+      )} */}
       {inCall && (
         <div className='relative w-full h-full bg-black'>
-          {/* Remote video - fullscreen */}
-          <video ref={remoteVideo} autoPlay playsInline className='w-full h-full object-cover bg-black' />
+          {/* Remote video */}
+          <video ref={remoteVideoRef} autoPlay playsInline className='w-full h-full object-cover bg-black' />
 
-          {/* Local video - small overlay */}
+          {/* Local video */}
           <video
-            ref={localVideo}
+            ref={localVideoRef}
             autoPlay
             muted
             playsInline

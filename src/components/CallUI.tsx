@@ -1,12 +1,15 @@
 'use client'
 import React, { useEffect, useRef } from 'react'
+
 import { IconButton } from '@mui/material'
+
 import { useCall } from '@/@core/hooks/useCall'
 import { getSocket } from '@/@core/lib/socket'
 import VideoCall from './VideoCall'
 
 export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: string; remoteUserId: string }) {
   const socket = getSocket()
+
   const {
     inCall,
     outCall,

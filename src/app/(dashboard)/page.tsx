@@ -1,4 +1,5 @@
 // Component Imports
+
 import ChatWrapper from '@views/chat'
 
 const ChatApp = () => {

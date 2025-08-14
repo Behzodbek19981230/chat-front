@@ -206,7 +206,12 @@ const ChatContent = (props: Props) => {
               </div>
             )}
           </div>
-          <CallUI remoteUserId='1' selfUserId='2' />
+          {chatStore && (
+            <CallUI
+              remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
+              selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
+            />
+          )}
 
           <ChatLog
             chatStore={chatStore}

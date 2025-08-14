@@ -1,8 +1,11 @@
 'use client'
 import React, { useEffect, useRef } from 'react'
 
+import { IconButton } from '@mui/material'
+
 import { useCall } from '@/@core/hooks/useCall'
 import { getSocket } from '@/@core/lib/socket'
+import VideoCall from './VideoCall'
 
 export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: string; remoteUserId: string }) {
   const socket = getSocket()
@@ -45,47 +48,26 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
   })
 
   return (
-    <div className='p-3 border rounded-lg'>
+    <>
+      {/* Call button */}
       {!inCall && !incomingCall && (
-        <button
-          onClick={() => callUser(remoteUserId, { audio: true, video: true })}
-          className='px-4 py-2 bg-blue-500 text-white rounded'
-        >
-          Call {remoteUserId}
-        </button>
+        <IconButton color='secondary' onClick={() => callUser(remoteUserId, { audio: true, video: true })}>
+          <i className='tabler-video' />
+        </IconButton>
       )}
-
-      {incomingCall && !inCall && (
-        <div>
-          <p>{incomingCall.fromUserId} is calling...</p>
-          <button onClick={acceptCall} className='px-4 py-2 bg-green-500 text-white rounded'>
-            Accept
-          </button>
-          <button onClick={rejectCall} className='px-4 py-2 bg-red-500 text-white rounded'>
-            Reject
-          </button>
-        </div>
-      )}
-
-      {inCall && (
-        <div>
-          <div className='flex gap-2'>
-            <video ref={localVideo} autoPlay muted playsInline className='w-1/2 bg-black rounded' />
-            <video ref={remoteVideo} autoPlay playsInline className='w-1/2 bg-black rounded' />
-          </div>
-          <div className='flex gap-2 mt-2'>
-            <button onClick={toggleMic} className='px-3 py-1 bg-gray-300 rounded'>
-              {micOn ? 'Mic Off' : 'Mic On'}
-            </button>
-            <button onClick={toggleCam} className='px-3 py-1 bg-gray-300 rounded'>
-              {camOn ? 'Cam Off' : 'Cam On'}
-            </button>
-            <button onClick={endCall} className='px-3 py-1 bg-red-500 text-white rounded'>
-              End Call
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      <VideoCall
+        inCall={inCall}
+        incomingCall={incomingCall}
+        localVideo={localVideo}
+        remoteVideo={remoteVideo}
+        micOn={micOn}
+        camOn={camOn}
+        toggleMic={toggleMic}
+        toggleCam={toggleCam}
+        endCall={endCall}
+        acceptCall={acceptCall}
+        rejectCall={rejectCall}
+      />
+    </>
   )
 }

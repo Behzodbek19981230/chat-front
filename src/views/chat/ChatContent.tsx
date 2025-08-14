@@ -175,12 +175,13 @@ const ChatContent = (props: Props) => {
               />
             ) : (
               <div className='flex items-center gap-1'>
-                <IconButton color='secondary'>
-                  <i className='tabler-phone' />
-                </IconButton>
-                <IconButton color='secondary'>
-                  <i className='tabler-video' />
-                </IconButton>
+                {chatStore && (
+                  <CallUI
+                    remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
+                    selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
+                  />
+                )}
+
                 <IconButton color='secondary'>
                   <i className='tabler-search' />
                 </IconButton>
@@ -206,12 +207,6 @@ const ChatContent = (props: Props) => {
               </div>
             )}
           </div>
-          {chatStore && (
-            <CallUI
-              remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
-              selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
-            />
-          )}
 
           <ChatLog
             chatStore={chatStore}

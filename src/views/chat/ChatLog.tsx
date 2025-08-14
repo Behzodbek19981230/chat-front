@@ -97,10 +97,10 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
             return (
               <div key={index} className={classnames('flex gap-4 p-6', { 'flex-row-reverse': isSender })}>
                 {!isSender ? (
-                  contacts.find(contact => contact.id === activeUser?.id)?.avatar ? (
+                  contacts.find(contact => contact.userId === activeUser?.id)?.avatar ? (
                     <Avatar
-                      alt={contacts.find(contact => contact.id === activeUser?.id)?.title}
-                      src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${contacts.find(contact => contact.id === activeUser?.id)?.avatar ?? ''}`}
+                      alt={contacts.find(contact => contact.userId === activeUser?.id)?.title}
+                      src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${contacts.find(contact => contact.userId === activeUser?.id)?.avatar ?? ''}`}
                       className='is-8 bs-8'
                     />
                   ) : (

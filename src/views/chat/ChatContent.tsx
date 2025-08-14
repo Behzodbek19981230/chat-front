@@ -16,6 +16,7 @@ import SendMsgForm from './SendMsgForm'
 import UserProfileRight from './UserProfileRight'
 import CustomAvatar from '@core/components/mui/Avatar'
 import type { ChatStoreType } from '@views/chat/index'
+import CallUI from '@/components/CallUI'
 
 export type ContactType = {
   id: number | null
@@ -58,7 +59,7 @@ const UserAvatar = ({
   >
     <AvatarWithBadge
       alt={activeUser?.fullName}
-      src={activeUser?.avatar}
+      src={`${process.env.NEXT_PUBLIC_API_URL_BASE ?? ''}${activeUser?.avatar}`}
       color={'secondary'}
       badgeColor={activeUser.online ? 'success' : 'secondary'}
     />
@@ -205,6 +206,7 @@ const ChatContent = (props: Props) => {
               </div>
             )}
           </div>
+          <CallUI remoteUserId='1' selfUserId='2' />
 
           <ChatLog
             chatStore={chatStore}

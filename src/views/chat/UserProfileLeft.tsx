@@ -1,5 +1,5 @@
 // React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 // MUI Import
@@ -50,7 +50,7 @@ const UserProfileLeft = (props: Props) => {
   const { push } = useRouter()
 
   const [avatar, setAvatar] = useState<string>(
-    (process.env.NEXT_PUBLIC_API_URL_BASE ?? '') + (chatStore?.profileUser?.avatar || '')
+    `${process.env.NEXT_PUBLIC_API_URL_BASE}${chatStore?.profileUser?.avatar}`
   )
 
   // States
@@ -93,6 +93,12 @@ const UserProfileLeft = (props: Props) => {
       fileInput.click()
     }
   }
+
+  useEffect(() => {
+    if (chatStore?.profileUser?.avatar) {
+      setAvatar(`${process.env.NEXT_PUBLIC_API_URL_BASE}${chatStore?.profileUser?.avatar}`)
+    }
+  }, [chatStore?.profileUser?.avatar])
 
   return (
     <>

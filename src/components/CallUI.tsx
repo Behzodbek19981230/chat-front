@@ -55,19 +55,22 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
           <i className='tabler-video' />
         </IconButton>
       )}
-      <VideoCall
-        inCall={inCall}
-        incomingCall={incomingCall}
-        localVideo={localVideo}
-        remoteVideo={remoteVideo}
-        micOn={micOn}
-        camOn={camOn}
-        toggleMic={toggleMic}
-        toggleCam={toggleCam}
-        endCall={endCall}
-        acceptCall={acceptCall}
-        rejectCall={rejectCall}
-      />
+
+      {(inCall || incomingCall) && (
+        <VideoCall
+          inCall={inCall}
+          incomingCall={incomingCall}
+          localVideo={localVideo}
+          remoteVideo={remoteVideo}
+          micOn={micOn}
+          camOn={camOn}
+          toggleMic={toggleMic}
+          toggleCam={toggleCam}
+          endCall={endCall}
+          acceptCall={acceptCall}
+          rejectCall={rejectCall}
+        />
+      )}
     </>
   )
 }

@@ -43,7 +43,7 @@ function createAxios() {
 
           if (typeof window !== 'undefined') {
             cleareStorage()
-            window.location.href = `/`
+            window.location.href = `/login`
           }
 
           break

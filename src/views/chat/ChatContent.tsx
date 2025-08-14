@@ -182,6 +182,12 @@ const ChatContent = (props: Props) => {
               />
             ) : (
               <div className='flex items-center gap-1'>
+                {chatStore && (
+                  <CallUI
+                    remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
+                    selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
+                  />
+                )}
                 <IconButton color='secondary'>
                   <i className='tabler-search' />
                 </IconButton>

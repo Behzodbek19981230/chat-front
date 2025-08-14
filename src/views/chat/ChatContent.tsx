@@ -125,7 +125,7 @@ const ChatContent = (props: Props) => {
     <>
       {activeUser && (
         <div className='flex flex-col flex-grow bs-full bg-backgroundChat'>
-          <div className='flex items-center justify-between border-be plb-[17px] pli-6 bg-backgroundPaper'>
+          <div className='flex items-center justify-between border-be plb-[17px] pli-6 bg-backgroundPaper '>
             {isBelowMdScreen ? (
               <div className='flex items-center gap-4'>
                 <IconButton
@@ -175,8 +175,6 @@ const ChatContent = (props: Props) => {
                         }
                       }
                     },
-                    'Mute Notifications',
-                    'Block Contact',
                     'Clear Chat',
                     'Block'
                   ]}
@@ -215,14 +213,12 @@ const ChatContent = (props: Props) => {
               </div>
             )}
           </div>
-
           <ChatLog
             chatStore={chatStore}
             isBelowMdScreen={isBelowMdScreen}
             isBelowSmScreen={isBelowSmScreen}
             isBelowLgScreen={isBelowLgScreen}
           />
-
           <SendMsgForm
             chatId={chatId}
             sendMsg={sendMsg}

@@ -1,6 +1,5 @@
 // React Imports
 import { useRef, useEffect } from 'react'
-import type { MutableRefObject, ReactNode } from 'react'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -9,7 +8,6 @@ import CardContent from '@mui/material/CardContent'
 
 // Third-party Imports
 import classnames from 'classnames'
-import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 
@@ -27,39 +25,9 @@ type ChatLogProps = {
   isBelowSmScreen: boolean
 }
 
-// Wrapper for the chat log to handle scrolling
-const ScrollWrapper = ({
-  children,
-  isBelowLgScreen,
-  scrollRef,
-  className
-}: {
-  children: ReactNode
-  isBelowLgScreen: boolean
-  scrollRef: MutableRefObject<null>
-  className?: string
-}) => {
-  if (isBelowLgScreen) {
-    return (
-      <div ref={scrollRef} className={classnames('bs-full overflow-y-auto overflow-x-hidden', className)}>
-        {children}
-      </div>
-    )
-  } else {
-    return (
-      <PerfectScrollbar ref={scrollRef} options={{ wheelPropagation: false }} className={className}>
-        {children}
-      </PerfectScrollbar>
-    )
-  }
-}
-
 const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen }: ChatLogProps) => {
   // Props
-  console.log(chatStore)
   const { profileUser, contacts, chats, activeUser } = chatStore
-
-  console.log(contacts)
 
   // Refs
   const scrollRef = useRef(null)
@@ -86,7 +54,7 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
   }, [chatStore])
 
   return (
-    <ScrollWrapper isBelowLgScreen={isBelowLgScreen} scrollRef={scrollRef}>
+    <>
       <CardContent className='p-0'>
         {activeUser &&
           chats.map((msgGroup, index) => {
@@ -160,7 +128,7 @@ const ChatLog = ({ chatStore, isBelowLgScreen, isBelowMdScreen, isBelowSmScreen 
             )
           })}
       </CardContent>
-    </ScrollWrapper>
+    </>
   )
 }
 

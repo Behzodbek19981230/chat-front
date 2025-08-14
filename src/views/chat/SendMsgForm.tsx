@@ -1,6 +1,6 @@
 // React Imports
 import { useRef, useState, useEffect } from 'react'
-import type { FormEvent, KeyboardEvent, RefObject, MouseEvent } from 'react'
+import type { FormEvent, KeyboardEvent, RefObject } from 'react'
 
 // MUI Imports
 import TextField from '@mui/material/TextField'
@@ -10,8 +10,6 @@ import Popper from '@mui/material/Popper'
 import Fade from '@mui/material/Fade'
 import Paper from '@mui/material/Paper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
 
 // Third-party Imports
 import Picker from '@emoji-mart/react'
@@ -82,7 +80,6 @@ const EmojiPicker = ({
 const SendMsgForm = ({ activeUser, sendMsg, chatId, isBelowSmScreen, messageInputRef }: Props) => {
   // States
   const [msg, setMsg] = useState('')
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false)
 
   // Refs
@@ -90,18 +87,9 @@ const SendMsgForm = ({ activeUser, sendMsg, chatId, isBelowSmScreen, messageInpu
   const anchorRef = useRef<HTMLButtonElement>(null)
 
   // Vars
-  const open = Boolean(anchorEl)
 
   const handleToggle = () => {
     setOpenEmojiPicker(prevOpen => !prevOpen)
-  }
-
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(prev => (prev ? null : event.currentTarget))
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
   }
 
   const handleSendMsg = (event: FormEvent | KeyboardEvent, msg: string) => {
@@ -115,37 +103,21 @@ const SendMsgForm = ({ activeUser, sendMsg, chatId, isBelowSmScreen, messageInpu
 
   const handleInputEndAdornment = () => {
     return (
-      <div className='flex items-center gap-1'>
+      <div className='flex items-center gap-1  '>
         {isBelowSmScreen ? (
           <>
-            <IconButton
-              id='option-menu'
-              aria-haspopup='true'
-              {...(open && { 'aria-expanded': true, 'aria-controls': 'share-menu' })}
-              onClick={handleClick}
-              ref={anchorRef}
-            >
-              <i className='tabler-dots-vertical text-textPrimary' />
-            </IconButton>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-              <MenuItem
+            <div className='flex justify-end items-center gap-1'>
+              <IconButton
                 onClick={() => {
                   handleToggle()
-                  handleClose()
                 }}
               >
                 <i className='tabler-mood-smile' />
-              </MenuItem>
-              <MenuItem onClick={handleClose}>
+              </IconButton>
+              {/* <IconButton onClick={handleClose}>
                 <i className='tabler-microphone' />
-              </MenuItem>
-              <MenuItem onClick={handleClose} className='p-0'>
-                <label htmlFor='upload-img' className='plb-2 pli-4'>
-                  <i className='tabler-paperclip' />
-                  <input hidden type='file' id='upload-img' />
-                </label>
-              </MenuItem>
-            </Menu>
+              </IconButton> */}
+            </div>
             <EmojiPicker
               anchorRef={anchorRef}
               openEmojiPicker={openEmojiPicker}
@@ -181,10 +153,6 @@ const SendMsgForm = ({ activeUser, sendMsg, chatId, isBelowSmScreen, messageInpu
             <IconButton>
               <i className='tabler-microphone text-textPrimary' />
             </IconButton>
-            <IconButton component='label' htmlFor='upload-img'>
-              <i className='tabler-paperclip text-textPrimary' />
-              <input hidden type='file' id='upload-img' />
-            </IconButton>
           </>
         )}
         {isBelowSmScreen ? (
@@ -212,7 +180,7 @@ const SendMsgForm = ({ activeUser, sendMsg, chatId, isBelowSmScreen, messageInpu
         maxRows={4}
         placeholder='Type a message'
         value={msg}
-        className='p-6'
+        className='p-2 rounded-lg '
         onChange={e => setMsg(e.target.value)}
         sx={{
           '& fieldset': { border: '0' },

@@ -57,6 +57,8 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     remoteUserIdRef.current = toUserId
     createPeerConnection()
     await getMedia(media)
+    console.log('Calling user:', toUserId, 'with media:', media)
+
     socket.emit('call-user', { fromUserId: selfUserId, toUserId, media })
   }
 

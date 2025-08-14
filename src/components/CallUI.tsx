@@ -47,6 +47,15 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     }
   })
 
+  console.log('CallUI rendered', {
+    inCall,
+    incomingCall,
+    micOn,
+    camOn,
+    localStreamRef: localStreamRef.current,
+    remoteStreamRef: remoteStreamRef.current
+  })
+
   return (
     <>
       {/* Call button */}

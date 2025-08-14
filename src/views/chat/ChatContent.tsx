@@ -145,6 +145,12 @@ const ChatContent = (props: Props) => {
                   setBackdropOpen={setBackdropOpen}
                   setUserProfileLeftOpen={setUserProfileRightOpen}
                 />
+                {chatStore && (
+                  <CallUI
+                    remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
+                    selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
+                  />
+                )}
               </div>
             ) : (
               <UserAvatar
@@ -153,6 +159,7 @@ const ChatContent = (props: Props) => {
                 setUserProfileLeftOpen={setUserProfileRightOpen}
               />
             )}
+
             {isBelowMdScreen ? (
               <OptionMenu
                 iconButtonProps={{ size: 'medium' }}
@@ -175,13 +182,6 @@ const ChatContent = (props: Props) => {
               />
             ) : (
               <div className='flex items-center gap-1'>
-                {chatStore && (
-                  <CallUI
-                    remoteUserId={chatStore?.activeUser?.id?.toString() ?? ''}
-                    selfUserId={chatStore?.profileUser?.id?.toString() ?? ''}
-                  />
-                )}
-
                 <IconButton color='secondary'>
                   <i className='tabler-search' />
                 </IconButton>

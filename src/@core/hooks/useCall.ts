@@ -7,7 +7,9 @@ type MediaPrefs = { audio: boolean; video: boolean }
 
 export function useCall(socket: Socket, selfUserId: string | number) {
   const [inCall, setInCall] = useState(false)
+  const [outCall,setOutCall]=useState(false)
   const [incomingCall, setIncomingCall] = useState<null | { fromUserId: any; media: MediaPrefs }>(null)
+
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
 
@@ -77,6 +79,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     createPeerConnection()
     await getMedia(media)
     socket.emit('call-user', { fromUserId: selfUserId, toUserId, media })
+    setOutCall(true)
   }
 
   // Qo‘ng‘iroq qabul qilish
@@ -106,6 +109,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     pcRef.current?.close()
     pcRef.current = null
     setInCall(false)
+    setOutCall(false)
     remoteUserIdRef.current = null
   }
 
@@ -157,6 +161,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     socket.on('webrtc-answer', async ({ answer }) => {
       await pcRef.current!.setRemoteDescription(new RTCSessionDescription(answer))
       setInCall(true)
+      setOutCall(false)
     })
 
     socket.on('webrtc-ice', async ({ candidate }) => {
@@ -190,9 +195,12 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     toggleCam,
     micOn,
     camOn,
+    outCall,
 
     // ✅ video elementlarni tashqaridan ulash uchun
     localVideoElementRef,
-    remoteVideoElementRef
+    remoteVideoElementRef,
+    localStreamRef,
+    remoteStreamRef
   }
 }

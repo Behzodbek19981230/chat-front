@@ -7,6 +7,7 @@ import { Button, IconButton, Typography } from '@mui/material'
 type Props = {
   incomingCall: { fromUserId: string } | null
   inCall: boolean
+  outCall: boolean
   acceptCall: () => void
   rejectCall: () => void
   endCall: () => void
@@ -14,12 +15,13 @@ type Props = {
   toggleMic: () => void
   camOn: boolean
   toggleCam: () => void
-  localVideoRef: React.RefObject<HTMLVideoElement>
-  remoteVideoRef: React.RefObject<HTMLVideoElement>
+  localVideo: React.RefObject<HTMLVideoElement>
+  remoteVideo: React.RefObject<HTMLVideoElement>
 }
 
 export default function VideoCall({
   incomingCall,
+  outCall,
   inCall,
   acceptCall,
   rejectCall,
@@ -28,15 +30,18 @@ export default function VideoCall({
   toggleMic,
   camOn,
   toggleCam,
-  localVideoRef,
-  remoteVideoRef
+  localVideo,
+  remoteVideo
 }: Props) {
   return (
     <div className='fixed inset-0 flex items-center justify-center bg-gray-900 z-50'>
+      {/* Incoming call UI */}
       {incomingCall && !inCall && (
         <div className='flex flex-col items-center gap-4 p-6 bg-white rounded-xl shadow-lg'>
-          <Typography variant='h6'>{incomingCall.fromUserId} is calling...</Typography>
-          <Image src='/images/videocall.gif' alt='Incoming Call' width={120} height={120} />
+          <Typography variant='h6' className='text-center'>
+            {incomingCall.fromUserId} is calling...
+          </Typography>
+          <Image src='/images/videocall.gif' alt='Incoming Call' width={120} height={120} className='mb-4' />
           <div className='flex gap-4'>
             <Button onClick={acceptCall} variant='contained' color='success' startIcon={<i className='tabler-phone' />}>
               Qabul qilish
@@ -52,26 +57,35 @@ export default function VideoCall({
           </div>
         </div>
       )}
-      {/* Outgoing Call UI */}
-      {/* {outgoingCall && !inCall && (
+
+      {/* Outgoing call UI */}
+      {outCall && !inCall && (
         <div className='flex flex-col items-center gap-4 p-6 bg-white rounded-xl shadow-lg'>
-          <Typography variant='h6' className='text-center'>
-            {outgoingCall.toUserId} bilan bog‘lanmoqda...
-          </Typography>
-          <Image src='/images/calling.gif' alt='Calling...' width={120} height={120} className='mb-4' />
-          <Button onClick={endCall} variant='contained' color='error' startIcon={<i className='tabler-phone-off' />}>
-            Bekor qilish
-          </Button>
+          <Typography variant='h6' className='text-center'>Calling...</Typography>
+          <Image src='/images/videocall.gif' alt='Outgoing Call' width={120} height={120} className='mb-4' />
+          <div className='flex gap-4'>
+            <Button onClick={endCall} variant='contained' color='error' startIcon={<i className='tabler-phone-off' />}>
+              End Call
+            </Button>
+            <Button onClick={toggleMic} variant='contained' color={micOn ? 'primary' : 'secondary'}>
+              {micOn ? 'Mute' : 'Unmute'}
+            </Button>
+            <Button onClick={toggleCam} variant='contained' color={camOn ? 'primary' : 'secondary'}>
+              {camOn ? 'Disable Camera' : 'Enable Camera'}
+            </Button>
+          </div>
         </div>
-      )} */}
+      )}
+
+      {/* In-call UI */}
       {inCall && (
         <div className='relative w-full h-full bg-black'>
-          {/* Remote video */}
-          <video ref={remoteVideoRef} autoPlay playsInline className='w-full h-full object-cover bg-black' />
+          {/* Remote video - fullscreen */}
+          <video ref={remoteVideo} autoPlay playsInline className='w-full h-full object-cover bg-black' />
 
-          {/* Local video */}
+          {/* Local video - small overlay */}
           <video
-            ref={localVideoRef}
+            ref={localVideo}
             autoPlay
             muted
             playsInline

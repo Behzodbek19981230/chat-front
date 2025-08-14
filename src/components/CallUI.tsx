@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { IconButton } from '@mui/material'
 
@@ -12,6 +12,7 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
 
   const {
     inCall,
+    outCall,
     incomingCall,
     callUser,
     acceptCall,
@@ -21,9 +22,12 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     toggleCam,
     micOn,
     camOn,
-    localVideoElementRef,
-    remoteVideoElementRef
+    localStreamRef,
+    remoteStreamRef
   } = useCall(socket, selfUserId)
+
+  const localVideo = useRef<HTMLVideoElement>(null)
+  const remoteVideo = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     socket.connect()
@@ -34,6 +38,25 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     }
   }, [socket, selfUserId])
 
+  useEffect(() => {
+    if (localVideo.current && localStreamRef.current) {
+      localVideo.current.srcObject = localStreamRef.current
+    }
+
+    if (remoteVideo.current && remoteStreamRef.current) {
+      remoteVideo.current.srcObject = remoteStreamRef.current
+    }
+  })
+
+  console.log('CallUI rendered', {
+    inCall,
+    incomingCall,
+    micOn,
+    camOn,
+    localStreamRef: localStreamRef.current,
+    remoteStreamRef: remoteStreamRef.current
+  })
+
   return (
     <>
       {/* Call button */}
@@ -43,19 +66,20 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
         </IconButton>
       )}
 
-      {(inCall || incomingCall) && (
+      {(inCall || incomingCall || outCall) && (
         <VideoCall
-          incomingCall={incomingCall}
+          outCall={outCall}
           inCall={inCall}
+          incomingCall={incomingCall}
+          localVideo={localVideo}
+          remoteVideo={remoteVideo}
+          micOn={micOn}
+          camOn={camOn}
+          toggleMic={toggleMic}
+          toggleCam={toggleCam}
+          endCall={endCall}
           acceptCall={acceptCall}
           rejectCall={rejectCall}
-          endCall={endCall}
-          micOn={micOn}
-          toggleMic={toggleMic}
-          camOn={camOn}
-          toggleCam={toggleCam}
-          localVideoRef={localVideoElementRef}
-          remoteVideoRef={remoteVideoElementRef}
         />
       )}
     </>

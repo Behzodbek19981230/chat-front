@@ -1,7 +1,5 @@
 import React from 'react'
 
-import Image from 'next/image'
-
 import { Button, IconButton, Typography } from '@mui/material'
 
 type Props = {
@@ -39,7 +37,7 @@ export default function VideoCall({
           <Typography variant='h6' className='text-center'>
             {incomingCall.fromUserId} is calling...
           </Typography>
-          <Image src='/images/videocall.gif' alt='Incoming Call' width={120} height={120} className='mb-4' />
+          {/* <Image src='/images/videocall.gif' alt='Incoming Call' width={120} height={120} className='mb-4' /> */}
           <div className='flex gap-4'>
             <Button onClick={acceptCall} variant='contained' color='success' startIcon={<i className='tabler-phone' />}>
               Qabul qilish

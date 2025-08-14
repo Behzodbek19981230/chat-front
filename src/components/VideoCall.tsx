@@ -66,13 +66,15 @@ export default function VideoCall({
           <div className='flex gap-4'>
             <Button onClick={endCall} variant='contained' color='error' startIcon={<i className='tabler-phone-off' />}>
               End Call
-            </Button>
-            <Button onClick={toggleMic} variant='contained' color={micOn ? 'primary' : 'secondary'}>
-              {micOn ? 'Mute' : 'Unmute'}
-            </Button>
-            <Button onClick={toggleCam} variant='contained' color={camOn ? 'primary' : 'secondary'}>
-              {camOn ? 'Disable Camera' : 'Enable Camera'}
-            </Button>
+            </Button> <IconButton onClick={toggleMic} className='bg-white/20 hover:bg-white/30 text-white'>
+            {micOn ? <i className='tabler-microphone text-xl' /> : <i className='tabler-microphone-off text-xl' />}
+          </IconButton>
+            <IconButton onClick={toggleCam} className='bg-white/20 hover:bg-white/30 text-white'>
+              {camOn ? <i className='tabler-video text-xl' /> : <i className='tabler-video-off text-xl' />}
+            </IconButton>
+            <IconButton onClick={endCall} className='bg-red-600 hover:bg-red-700 text-white'>
+              <i className='tabler-phone-off text-xl' />
+            </IconButton>
           </div>
         </div>
       )}

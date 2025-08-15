@@ -40,17 +40,13 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       }
     }
 
-    pc.ontrack = e => {
-      if (!remoteStreamRef.current) {
-        remoteStreamRef.current = new MediaStream()
-      }
-
-      e.streams[0].getTracks().forEach(track => {
-        remoteStreamRef.current!.addTrack(track)
-      })
-
-      if (remoteVideoElementRef.current) {
-        remoteVideoElementRef.current.srcObject = remoteStreamRef.current
+    pc.ontrack = event => {
+      if (remoteStreamRef.current) {
+        event.streams[0].getTracks().forEach(track => {
+          remoteStreamRef.current?.addTrack(track)
+        })
+      } else {
+        remoteStreamRef.current = event.streams[0]
       }
     }
 
@@ -66,13 +62,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
 
       localStreamRef.current = stream
 
-      if (localVideoElementRef.current) {
-        localVideoElementRef.current.srcObject = stream
-      }
-
-      stream.getTracks().forEach(track => {
-        pcRef.current?.addTrack(track, stream)
-      })
+      stream.getTracks().forEach(track => pcRef.current?.addTrack(track, stream))
     } catch (error) {
       console.error('Error getting media:', error)
       throw error
@@ -136,7 +126,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     setMicOn(prev => {
       localStreamRef.current?.getAudioTracks().forEach(t => (t.enabled = !prev))
 
-return !prev
+      return !prev
     })
   }
 
@@ -144,7 +134,7 @@ return !prev
     setCamOn(prev => {
       localStreamRef.current?.getVideoTracks().forEach(t => (t.enabled = !prev))
 
-return !prev
+      return !prev
     })
   }
 
@@ -159,7 +149,7 @@ return !prev
         endCall()
         alert('User rejected the call')
 
-return
+        return
       }
 
       try {

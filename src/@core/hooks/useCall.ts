@@ -1,6 +1,5 @@
 // hooks/useCall.ts
-// hooks/useCall.ts
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { Socket } from 'socket.io-client'
 
@@ -14,29 +13,25 @@ export function useCall(socket: Socket, selfUserId: string | number) {
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
 
-  // Video element refs (Parent (CallUI/VideoCall) tomonidan ulanishi uchun)
-  const localVideoElementRef = useRef<HTMLVideoElement | null>(null)
-  const remoteVideoElementRef = useRef<HTMLVideoElement | null>(null)
-
   const localStreamRef = useRef<MediaStream | null>(null)
   const remoteStreamRef = useRef<MediaStream | null>(null)
+
+  // ✅ video element ref-larini hook ichida saqlaymiz
+  const localVideoElementRef = useRef<HTMLVideoElement | null>(null)
+  const remoteVideoElementRef = useRef<HTMLVideoElement | null>(null)
 
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const remoteUserIdRef = useRef<string | number | null>(null)
 
-  const iceServers: RTCIceServer[] = useMemo(
-    () => [
-      { urls: 'stun:45.138.159.166:3478' },
-      {
-        urls: 'turn:45.138.159.166:3478',
-        username: 'chatuser',
-        credential: 'ch@tpass123'
-      }
-    ],
-    []
-  )
+  const iceServers: RTCIceServer[] = [
+    { urls: 'stun:45.138.159.166:3478' },
+    {
+      urls: 'turn:45.138.159.166:3478',
+      username: 'chatuser',
+      credential: 'ch@tpass123'
+    }
+  ]
 
-  // Yangi PeerConnection yaratish
   const createPeerConnection = () => {
     const pc = new RTCPeerConnection({ iceServers })
 
@@ -51,11 +46,11 @@ export function useCall(socket: Socket, selfUserId: string | number) {
         remoteStreamRef.current = new MediaStream()
       }
 
-      // Eskisini tozalash
-      remoteStreamRef.current.getTracks().forEach((track: { stop: () => any }) => track.stop())
+      // Clear existing tracks
+      remoteStreamRef.current.getTracks().forEach(track => track.stop())
 
-      // Yangi tracklar qo’shish
-      e.streams[0]?.getTracks().forEach(track => {
+      // Add new tracks
+      e.streams[0].getTracks().forEach(track => {
         remoteStreamRef.current!.addTrack(track)
       })
     }
@@ -63,7 +58,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     pcRef.current = pc
   }
 
-  // Media olish
   const getMedia = async (media: MediaPrefs) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -81,7 +75,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     }
   }
 
-  // Kimga qo’ng’iroq qilish
   const callUser = async (toUserId: string | number, media: MediaPrefs) => {
     try {
       remoteUserIdRef.current = toUserId
@@ -95,7 +88,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     }
   }
 
-  // Qo’ng’iroq qabul qilish
   const acceptCall = async () => {
     if (!incomingCall) return
 
@@ -122,7 +114,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     setIncomingCall(null)
   }
 
-  // Qolganlarni yakunlash
   const endCall = () => {
     if (remoteUserIdRef.current) {
       socket.emit('end-call', { toUserId: remoteUserIdRef.current })
@@ -137,29 +128,23 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     remoteUserIdRef.current = null
   }
 
-  // Mikrifon va kamera boshqaruvi
   const toggleMic = () => {
-    // @ts-ignore
     setMicOn(prev => {
-      const tracks = localStreamRef.current?.getAudioTracks() || []
+      localStreamRef.current?.getAudioTracks().forEach(t => (t.enabled = !prev))
 
-      tracks.forEach((t: { enabled: boolean }) => (t.enabled = !prev))
-
-return !prev
+      return !prev
     })
   }
 
   const toggleCam = () => {
-    setCamOn((prev: any) => {
-      const tracks = localStreamRef.current?.getVideoTracks() || []
+    setCamOn(prev => {
+      localStreamRef.current?.getVideoTracks().forEach(t => (t.enabled = !prev))
 
-      tracks.forEach((t: { enabled: boolean }) => (t.enabled = !prev))
-
-return !prev
+      return !prev
     })
   }
 
-  // Socket listenerlar
+  // Socket listeners
   useEffect(() => {
     const handleIncomingCall = ({ fromUserId, media }: { fromUserId: any; media: MediaPrefs }) => {
       setIncomingCall({ fromUserId, media })
@@ -170,7 +155,7 @@ return !prev
         endCall()
         alert('User rejected the call')
 
-return
+        return
       }
 
       try {
@@ -234,15 +219,10 @@ return
     }
   }, [socket])
 
-  // Video elementlarni DOMga ulash uchun
-  // localVideoElementRef va remoteVideoElementRef ni global ulab qo’yishingiz mumkin
-  // yoki VideoCall ichida useEffect orqali srcObject ni o'rnatishni davom ettirasiz
-
   return {
     inCall,
-    outCall,
     incomingCall,
-    callUser, // yuqorida yo'q bo'lsa export qilmayin, sizga mos yozing
+    callUser,
     acceptCall,
     rejectCall,
     endCall,
@@ -250,6 +230,9 @@ return
     toggleCam,
     micOn,
     camOn,
+    outCall,
+
+    // ✅ video elementlarni tashqaridan ulash uchun
     localVideoElementRef,
     remoteVideoElementRef,
     localStreamRef,

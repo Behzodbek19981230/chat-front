@@ -1,5 +1,6 @@
 // hooks/useCall.ts
-import { useEffect, useRef, useState } from 'react'
+// hooks/useCall.ts
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Socket } from 'socket.io-client'
 
@@ -13,24 +14,29 @@ export function useCall(socket: Socket, selfUserId: string | number) {
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
 
-  const localStreamRef = useRef<MediaStream | null>(null)
-  const remoteStreamRef = useRef<MediaStream | null>(null)
-
+  // Video element refs (Parent (CallUI/VideoCall) tomonidan ulanishi uchun)
   const localVideoElementRef = useRef<HTMLVideoElement | null>(null)
   const remoteVideoElementRef = useRef<HTMLVideoElement | null>(null)
+
+  const localStreamRef = useRef<MediaStream | null>(null)
+  const remoteStreamRef = useRef<MediaStream | null>(null)
 
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const remoteUserIdRef = useRef<string | number | null>(null)
 
-  const iceServers: RTCIceServer[] = [
-    { urls: 'stun:45.138.159.166:3478' },
-    {
-      urls: 'turn:45.138.159.166:3478',
-      username: 'chatuser',
-      credential: 'ch@tpass123'
-    }
-  ]
+  const iceServers: RTCIceServer[] = useMemo(
+    () => [
+      { urls: 'stun:45.138.159.166:3478' },
+      {
+        urls: 'turn:45.138.159.166:3478',
+        username: 'chatuser',
+        credential: 'ch@tpass123'
+      }
+    ],
+    []
+  )
 
+  // Yangi PeerConnection yaratish
   const createPeerConnection = () => {
     const pc = new RTCPeerConnection({ iceServers })
 
@@ -40,19 +46,24 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       }
     }
 
-    pc.ontrack = event => {
-      if (remoteStreamRef.current) {
-        event.streams[0].getTracks().forEach(track => {
-          remoteStreamRef.current?.addTrack(track)
-        })
-      } else {
-        remoteStreamRef.current = event.streams[0]
+    pc.ontrack = e => {
+      if (!remoteStreamRef.current) {
+        remoteStreamRef.current = new MediaStream()
       }
+
+      // Eskisini tozalash
+      remoteStreamRef.current.getTracks().forEach((track: { stop: () => any }) => track.stop())
+
+      // Yangi tracklar qo’shish
+      e.streams[0]?.getTracks().forEach(track => {
+        remoteStreamRef.current!.addTrack(track)
+      })
     }
 
     pcRef.current = pc
   }
 
+  // Media olish
   const getMedia = async (media: MediaPrefs) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -61,14 +72,16 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       })
 
       localStreamRef.current = stream
-
-      stream.getTracks().forEach(track => pcRef.current?.addTrack(track, stream))
+      stream.getTracks().forEach(track => {
+        pcRef.current?.addTrack(track, stream)
+      })
     } catch (error) {
       console.error('Error getting media:', error)
       throw error
     }
   }
 
+  // Kimga qo’ng’iroq qilish
   const callUser = async (toUserId: string | number, media: MediaPrefs) => {
     try {
       remoteUserIdRef.current = toUserId
@@ -82,6 +95,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     }
   }
 
+  // Qo’ng’iroq qabul qilish
   const acceptCall = async () => {
     if (!incomingCall) return
 
@@ -108,6 +122,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     setIncomingCall(null)
   }
 
+  // Qolganlarni yakunlash
   const endCall = () => {
     if (remoteUserIdRef.current) {
       socket.emit('end-call', { toUserId: remoteUserIdRef.current })
@@ -122,23 +137,29 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     remoteUserIdRef.current = null
   }
 
+  // Mikrifon va kamera boshqaruvi
   const toggleMic = () => {
+    // @ts-ignore
     setMicOn(prev => {
-      localStreamRef.current?.getAudioTracks().forEach(t => (t.enabled = !prev))
+      const tracks = localStreamRef.current?.getAudioTracks() || []
 
-      return !prev
+      tracks.forEach((t: { enabled: boolean }) => (t.enabled = !prev))
+
+return !prev
     })
   }
 
   const toggleCam = () => {
-    setCamOn(prev => {
-      localStreamRef.current?.getVideoTracks().forEach(t => (t.enabled = !prev))
+    setCamOn((prev: any) => {
+      const tracks = localStreamRef.current?.getVideoTracks() || []
 
-      return !prev
+      tracks.forEach((t: { enabled: boolean }) => (t.enabled = !prev))
+
+return !prev
     })
   }
 
-  // Socket listeners
+  // Socket listenerlar
   useEffect(() => {
     const handleIncomingCall = ({ fromUserId, media }: { fromUserId: any; media: MediaPrefs }) => {
       setIncomingCall({ fromUserId, media })
@@ -149,7 +170,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
         endCall()
         alert('User rejected the call')
 
-        return
+return
       }
 
       try {
@@ -167,10 +188,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     }
 
     const handleWebRTCOffer = async ({ offer }: { offer: RTCSessionDescriptionInit }) => {
-      if (!pcRef.current) {
-        createPeerConnection()
-      }
-
       try {
         await pcRef.current!.setRemoteDescription(new RTCSessionDescription(offer))
         const answer = await pcRef.current!.createAnswer()
@@ -192,10 +209,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     socket.on('webrtc-offer', handleWebRTCOffer)
 
     socket.on('webrtc-answer', async ({ answer }) => {
-      if (!pcRef.current) {
-        createPeerConnection()
-      }
-
       await pcRef.current!.setRemoteDescription(new RTCSessionDescription(answer))
       setInCall(true)
       setOutCall(false)
@@ -221,10 +234,15 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     }
   }, [socket])
 
+  // Video elementlarni DOMga ulash uchun
+  // localVideoElementRef va remoteVideoElementRef ni global ulab qo’yishingiz mumkin
+  // yoki VideoCall ichida useEffect orqali srcObject ni o'rnatishni davom ettirasiz
+
   return {
     inCall,
+    outCall,
     incomingCall,
-    callUser,
+    callUser, // yuqorida yo'q bo'lsa export qilmayin, sizga mos yozing
     acceptCall,
     rejectCall,
     endCall,
@@ -232,7 +250,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     toggleCam,
     micOn,
     camOn,
-    outCall,
     localVideoElementRef,
     remoteVideoElementRef,
     localStreamRef,

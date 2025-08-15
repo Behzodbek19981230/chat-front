@@ -1,11 +1,7 @@
-'use client'
-import React, { useEffect } from 'react'
-
-import { IconButton } from '@mui/material'
-
+// CallUI.tsx (aks holda mavjud)
 import { useCall } from '@/@core/hooks/useCall'
-import { getSocket } from '@/@core/lib/socket'
 import VideoCall from './VideoCall'
+import { getSocket } from '@core/lib/socket'
 
 export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: string; remoteUserId: string }) {
   const socket = getSocket()
@@ -22,27 +18,19 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     toggleCam,
     micOn,
     camOn,
+    localStreamRef,
+    remoteStreamRef,
     localVideoElementRef,
     remoteVideoElementRef
   } = useCall(socket, selfUserId)
 
-  useEffect(() => {
-    socket.connect()
-    socket.emit('user-online', selfUserId)
-
-    return () => {
-      socket.disconnect()
-    }
-  }, [socket, selfUserId])
-
-  console.log('CallUI rendered', { inCall, outCall, incomingCall, micOn, camOn })
-
+  // Video element refs bo'yicha
   return (
     <>
       {!inCall && !incomingCall && (
-        <IconButton color='secondary' onClick={() => callUser(remoteUserId, { audio: true, video: true })}>
-          <i className='tabler-video' />
-        </IconButton>
+        <button onClick={() => callUser(remoteUserId, { audio: true, video: true })}>
+          <span>Call</span>
+        </button>
       )}
 
       {(inCall || incomingCall || outCall) && (
@@ -50,8 +38,8 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
           outCall={outCall}
           inCall={inCall}
           incomingCall={incomingCall}
-          localVideoRef={localVideoElementRef}
-          remoteVideoRef={remoteVideoElementRef}
+          localVideo={localVideoElementRef}
+          remoteVideo={remoteVideoElementRef}
           micOn={micOn}
           camOn={camOn}
           toggleMic={toggleMic}

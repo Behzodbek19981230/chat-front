@@ -16,6 +16,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
   const localStreamRef = useRef<MediaStream | null>(null)
   const remoteStreamRef = useRef<MediaStream | null>(null)
 
+  // ✅ video element ref-larini hook ichida saqlaymiz
   const localVideoElementRef = useRef<HTMLVideoElement | null>(null)
   const remoteVideoElementRef = useRef<HTMLVideoElement | null>(null)
 
@@ -40,28 +41,23 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       }
     }
 
-    // Improved remote track handling
     pc.ontrack = e => {
-      console.log('Received remote tracks:', e.streams)
-
       if (!remoteStreamRef.current) {
         remoteStreamRef.current = new MediaStream()
-      } else {
-        // Clear existing tracks first
-        remoteStreamRef.current.getTracks().forEach(track => track.stop())
       }
 
-      // Add new tracks from all streams
-      e.streams.forEach(stream => {
-        stream.getTracks().forEach(track => {
-          console.log('Adding remote track:', track.kind)
-          remoteStreamRef.current?.addTrack(track)
-        })
+      // Avvalgi tracklarni to‘xtatib tashlaymiz
+      remoteStreamRef.current.getTracks().forEach(track => track.stop())
+
+      // Yangi tracklarni qo‘shamiz
+      e.streams[0].getTracks().forEach(track => {
+        remoteStreamRef.current!.addTrack(track)
       })
 
-      // Force UI update
-      setInCall(prev => !prev) // Temporary hack to force re-render
-      setTimeout(() => setInCall(prev => !prev), 100)
+      // Video elementga ulash
+      if (remoteVideoElementRef.current) {
+        remoteVideoElementRef.current.srcObject = remoteStreamRef.current
+      }
     }
 
     pcRef.current = pc
@@ -72,24 +68,19 @@ export function useCall(socket: Socket, selfUserId: string | number) {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: media.audio,
         video: media.video
-          ? {
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            }
-          : false
       })
 
       localStreamRef.current = stream
+
+      if (localVideoElementRef.current) {
+        localVideoElementRef.current.srcObject = stream
+      }
+
       stream.getTracks().forEach(track => {
         pcRef.current?.addTrack(track, stream)
       })
     } catch (error) {
       console.error('Error getting media:', error)
-
-      if (media.video) {
-        await getMedia({ ...media, video: false })
-      }
-
       throw error
     }
   }
@@ -163,6 +154,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     })
   }
 
+  // Socket listeners
   useEffect(() => {
     const handleIncomingCall = ({ fromUserId, media }: { fromUserId: any; media: MediaPrefs }) => {
       setIncomingCall({ fromUserId, media })
@@ -249,6 +241,8 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     micOn,
     camOn,
     outCall,
+
+    // ✅ video elementlarni tashqaridan ulash uchun
     localVideoElementRef,
     remoteVideoElementRef,
     localStreamRef,

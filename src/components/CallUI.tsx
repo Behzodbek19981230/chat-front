@@ -38,57 +38,20 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     }
   }, [socket, selfUserId])
 
-  // Add this effect to handle remote stream changes
+  // Update video streams when they change
   useEffect(() => {
-    const updateVideoElements = () => {
-      console.log('Updating video elements', {
-        local: localStreamRef.current,
-        remote: remoteStreamRef.current
-      })
-
-      if (localVideo.current) {
-        localVideo.current.srcObject = localStreamRef.current
-
-        if (localStreamRef.current) {
-          console.log(
-            'Local video tracks:',
-            localStreamRef.current.getTracks().map(t => t.kind)
-          )
-        }
-      }
-
-      if (remoteVideo.current) {
-        remoteVideo.current.srcObject = remoteStreamRef.current
-
-        if (remoteStreamRef.current) {
-          console.log(
-            'Remote video tracks:',
-            remoteStreamRef.current.getTracks().map(t => t.kind)
-          )
-        }
-      }
+    if (localVideo.current && localStreamRef.current) {
+      localVideo.current.srcObject = localStreamRef.current
+    } else if (localVideo.current) {
+      localVideo.current.srcObject = null
     }
 
-    updateVideoElements()
-
-    // Add event listeners for stream changes
-    const localCleanup = () => {
-      if (localVideo.current) {
-        localVideo.current.srcObject = null
-      }
+    if (remoteVideo.current && remoteStreamRef.current) {
+      remoteVideo.current.srcObject = remoteStreamRef.current
+    } else if (remoteVideo.current) {
+      remoteVideo.current.srcObject = null
     }
-
-    const remoteCleanup = () => {
-      if (remoteVideo.current) {
-        remoteVideo.current.srcObject = null
-      }
-    }
-
-    return () => {
-      localCleanup()
-      remoteCleanup()
-    }
-  }, [inCall, incomingCall, outCall]) // Re-run when call states change
+  }, [localStreamRef.current, remoteStreamRef.current])
 
   console.log('CallUI rendered', {
     inCall,
@@ -98,14 +61,6 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     camOn,
     localStreamRef: localStreamRef.current,
     remoteStreamRef: remoteStreamRef.current
-  })
-  console.log('Remote stream state:', {
-    hasRemoteStream: !!remoteStreamRef.current,
-    tracks: remoteStreamRef.current?.getTracks().map(t => ({
-      kind: t.kind,
-      enabled: t.enabled,
-      readyState: t.readyState
-    }))
   })
 
   return (

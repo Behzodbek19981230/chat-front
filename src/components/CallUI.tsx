@@ -18,8 +18,7 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     toggleCam,
     micOn,
     camOn,
-    localStreamRef,
-    remoteStreamRef,
+
     localVideoElementRef,
     remoteVideoElementRef
   } = useCall(socket, selfUserId)

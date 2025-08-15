@@ -15,8 +15,8 @@ type Props = {
   toggleMic: () => void
   camOn: boolean
   toggleCam: () => void
-  localVideo: React.RefObject<HTMLVideoElement>
-  remoteVideo: React.RefObject<HTMLVideoElement>
+  localVideoRef: React.RefObject<HTMLVideoElement>
+  remoteVideoRef: React.RefObject<HTMLVideoElement>
 }
 
 export default function VideoCall({
@@ -30,8 +30,8 @@ export default function VideoCall({
   toggleMic,
   camOn,
   toggleCam,
-  localVideo,
-  remoteVideo
+  localVideoRef,
+  remoteVideoRef
 }: Props) {
   return (
     <div className='fixed inset-0 flex items-center justify-center bg-gray-900 z-50'>
@@ -61,12 +61,14 @@ export default function VideoCall({
       {/* Outgoing call UI */}
       {outCall && !inCall && (
         <div className='flex flex-col items-center gap-4 p-6 bg-white rounded-xl shadow-lg'>
-          <Typography variant='h6' className='text-center'>Calling...</Typography>
+          <Typography variant='h6' className='text-center'>
+            Calling...
+          </Typography>
           <Image src='/images/videocall.gif' alt='Outgoing Call' width={120} height={120} className='mb-4' />
           <div className='flex gap-4'>
-             <IconButton onClick={toggleMic} className='bg-white/20 hover:bg-white/30  ' color='primary'>
-            {micOn ? <i className='tabler-microphone  text-xl' /> : <i className='tabler-microphone-off text-xl' />}
-          </IconButton>
+            <IconButton onClick={toggleMic} className='bg-white/20 hover:bg-white/30  ' color='primary'>
+              {micOn ? <i className='tabler-microphone  text-xl' /> : <i className='tabler-microphone-off text-xl' />}
+            </IconButton>
             <IconButton onClick={toggleCam} className='bg-white/20 hover:bg-white/30 ' color='primary'>
               {camOn ? <i className='tabler-video text-xl' /> : <i className='tabler-video-off text-xl' />}
             </IconButton>
@@ -81,11 +83,12 @@ export default function VideoCall({
       {inCall && (
         <div className='relative w-full h-full bg-black'>
           {/* Remote video - fullscreen */}
-          <video ref={remoteVideo} autoPlay playsInline className='w-full h-full object-cover bg-black' />
+
+          <video ref={remoteVideoRef} autoPlay playsInline className='w-full h-full object-cover bg-black' />
 
           {/* Local video - small overlay */}
           <video
-            ref={localVideo}
+            ref={localVideoRef}
             autoPlay
             muted
             playsInline

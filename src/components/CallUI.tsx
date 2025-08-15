@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 
 import { IconButton } from '@mui/material'
 
@@ -22,12 +22,9 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     toggleCam,
     micOn,
     camOn,
-    localStreamRef,
-    remoteStreamRef
+    localVideoElementRef,
+    remoteVideoElementRef
   } = useCall(socket, selfUserId)
-
-  const localVideo = useRef<HTMLVideoElement>(null)
-  const remoteVideo = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     socket.connect()
@@ -38,30 +35,7 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
     }
   }, [socket, selfUserId])
 
-  // Update video streams when they change
-  useEffect(() => {
-    if (localVideo.current && localStreamRef.current) {
-      localVideo.current.srcObject = localStreamRef.current
-    } else if (localVideo.current) {
-      localVideo.current.srcObject = null
-    }
-
-    if (remoteVideo.current && remoteStreamRef.current) {
-      remoteVideo.current.srcObject = remoteStreamRef.current
-    } else if (remoteVideo.current) {
-      remoteVideo.current.srcObject = null
-    }
-  }, [localStreamRef.current, remoteStreamRef.current])
-
-  console.log('CallUI rendered', {
-    inCall,
-    outCall,
-    incomingCall,
-    micOn,
-    camOn,
-    localStreamRef: localStreamRef.current,
-    remoteStreamRef: remoteStreamRef.current
-  })
+  console.log('CallUI rendered', { inCall, outCall, incomingCall, micOn, camOn })
 
   return (
     <>
@@ -76,8 +50,8 @@ export default function CallUI({ selfUserId, remoteUserId }: { selfUserId: strin
           outCall={outCall}
           inCall={inCall}
           incomingCall={incomingCall}
-          localVideo={localVideo}
-          remoteVideo={remoteVideo}
+          localVideoRef={localVideoElementRef}
+          remoteVideoRef={remoteVideoElementRef}
           micOn={micOn}
           camOn={camOn}
           toggleMic={toggleMic}

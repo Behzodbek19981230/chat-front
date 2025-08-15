@@ -16,7 +16,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
   const localStreamRef = useRef<MediaStream | null>(null)
   const remoteStreamRef = useRef<MediaStream | null>(null)
 
-  // ✅ video element ref-larini hook ichida saqlaymiz
   const localVideoElementRef = useRef<HTMLVideoElement | null>(null)
   const remoteVideoElementRef = useRef<HTMLVideoElement | null>(null)
 
@@ -46,15 +45,10 @@ export function useCall(socket: Socket, selfUserId: string | number) {
         remoteStreamRef.current = new MediaStream()
       }
 
-      // Avvalgi tracklarni to‘xtatib tashlaymiz
-      remoteStreamRef.current.getTracks().forEach(track => track.stop())
-
-      // Yangi tracklarni qo‘shamiz
       e.streams[0].getTracks().forEach(track => {
         remoteStreamRef.current!.addTrack(track)
       })
 
-      // Video elementga ulash
       if (remoteVideoElementRef.current) {
         remoteVideoElementRef.current.srcObject = remoteStreamRef.current
       }
@@ -142,7 +136,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     setMicOn(prev => {
       localStreamRef.current?.getAudioTracks().forEach(t => (t.enabled = !prev))
 
-      return !prev
+return !prev
     })
   }
 
@@ -150,7 +144,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     setCamOn(prev => {
       localStreamRef.current?.getVideoTracks().forEach(t => (t.enabled = !prev))
 
-      return !prev
+return !prev
     })
   }
 
@@ -165,7 +159,7 @@ export function useCall(socket: Socket, selfUserId: string | number) {
         endCall()
         alert('User rejected the call')
 
-        return
+return
       }
 
       try {
@@ -183,6 +177,10 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     }
 
     const handleWebRTCOffer = async ({ offer }: { offer: RTCSessionDescriptionInit }) => {
+      if (!pcRef.current) {
+        createPeerConnection()
+      }
+
       try {
         await pcRef.current!.setRemoteDescription(new RTCSessionDescription(offer))
         const answer = await pcRef.current!.createAnswer()
@@ -204,6 +202,10 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     socket.on('webrtc-offer', handleWebRTCOffer)
 
     socket.on('webrtc-answer', async ({ answer }) => {
+      if (!pcRef.current) {
+        createPeerConnection()
+      }
+
       await pcRef.current!.setRemoteDescription(new RTCSessionDescription(answer))
       setInCall(true)
       setOutCall(false)
@@ -241,8 +243,6 @@ export function useCall(socket: Socket, selfUserId: string | number) {
     micOn,
     camOn,
     outCall,
-
-    // ✅ video elementlarni tashqaridan ulash uchun
     localVideoElementRef,
     remoteVideoElementRef,
     localStreamRef,
